@@ -1,0 +1,33 @@
+body {
+	background-color:#080808;
+    color:#5fba3d;
+    font-family:monospace, prestige;
+}
+
+.mainContent {
+	text-align: center;
+}
+
+.log {
+	background-color: #080808 !important;
+	border-color: #1e1e1e;
+	color: inherit;
+	width: 510px;
+	height: 100px;
+	padding: 0;
+	font-size: 10px;
+	margin-bottom: 0;
+	line-height: 10px;
+}
+
+.message {
+	width: 510px;
+	padding: 0 !important;
+	background-color: #080808 !important;
+	border-color: #1e1e1e !important;
+	color: inherit !important;
+}
+
+canvas {
+	margin-top: 8px;
+}
