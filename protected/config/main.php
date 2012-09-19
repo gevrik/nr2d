@@ -83,7 +83,8 @@ return array(
 		),
 		
 		'db'=>array(
-			'connectionString' => 'mysql:host=localhost;dbname=nr2d',
+			//'connectionString' => 'mysql:host=localhost;dbname=nr2d',
+			'connectionString' => 'mysql:host=localhost;port=8889;dbname=nr2d',
 			'emulatePrepare' => true,
 			'username' => 'nr2d',
 			'password' => 'ARtUVQBy7QKWCvHX',

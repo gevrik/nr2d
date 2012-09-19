@@ -4,7 +4,15 @@ var bgImage = new Image();
 bgImage.onload = function () {
 	bgReady = true;
 };
-bgImage.src = "../../images/background.png";
+bgImage.src = "../../images/loading.png";
+
+// Loading image
+var loadingReady = false;
+var loadingImage = new Image();
+loadingImage.onload = function () {
+	loadingReady = true;
+};
+loadingImage.src = "../../images/loading.png";
 
 // Hero image
 var heroReady = false;

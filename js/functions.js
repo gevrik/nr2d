@@ -9,6 +9,28 @@ function send( text ) {
 	Server.send( 'message', text );
 }
 
+function closeAllMenus(except)
+{
+	if (except != 'node')
+		showNodeMenu = false;
+	if (except != 'info')
+		showMenu = false;
+	if (except != 'memory')
+		showMemoryMenu = false;
+	if (except != 'storage')
+		showStorageMenu = false;
+	if (except != 'inventory')
+		showInventoryMenu = false;
+	if (except != 'program')
+		showProgramMenu = false;
+	if (except != 'virus')
+		showVirusMenu = false;
+	if (except != 'item')
+		showItemMenu = false;
+	if (except != 'char')
+		showCharMenu = false;
+}
+
 function getStorageUsed()
 {
 	var storageUsed = 0;
@@ -70,4 +92,18 @@ function renderMenuBG()
 
 Math.rand = function(min, max) {
 	return Math.floor(Math.random() * (max - min) + min);
+};
+
+var lineDistance = function( point1, point2 )
+{
+  var xs = 0;
+  var ys = 0;
+
+  xs = point2.x - point1.x;
+  xs = xs * xs;
+
+  ys = point2.y - point1.y;
+  ys = ys * ys;
+
+  return Math.sqrt( xs + ys );
 };

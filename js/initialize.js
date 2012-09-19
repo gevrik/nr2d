@@ -1,6 +1,7 @@
 var Server;
 var username;
 var holygrail;
+var gameReady = false;
 
 var storagePrograms = [];
 var otherUsers = [];
@@ -9,6 +10,14 @@ var memoryPrograms = [];
 var bullets = [];
 
 var showMemProgId = 0;
+
+var blockControls = false;
+var usedSlots = 0;
+var canExecute = false;
+
+var currentPage = 1;
+var maxPage = 1;
+var pageArray = [];
 
 var showUrl = '/index.php/world/xhrShow';
 
@@ -23,7 +32,8 @@ var ctxEffects = canvasEffects.getContext("2d");
 // Game objects
 var hero = {
 	maxMemory: 0,
-	maxStorage: 0
+	maxStorage: 0,
+	slots: 0
 };
 
 var roomName = '';

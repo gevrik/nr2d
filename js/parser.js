@@ -1,240 +1,106 @@
 function parseReply( text ) {
+
 			//console.log(text);
+
+			var parsed = JSON.parse(text);
+            var xcommand = parsed.xcommand;
+            var xvalue = parsed.xvalue;
+
+            //console.log('c: ' + xcommand + ' v: ' + xvalue);
+
 			var args = text.split(' ');
 			var command = args.shift();
 			var chatMessage;
-			
-			// check command
-			if (command == 'CHAT') {
-				// received chat text
-				var actorname = args.shift();
-				chatMessage = args.join(' ');
-				log(actorname+': ' + chatMessage);
-			}
 
-			else if (command == 'INITP') {
-				// received INITIAL PLAYER DATA
-				var heroRoom = args.shift();
-				var heroHome = args.shift();
-				var heroSpeed = args.shift();
-				var heroSocketId = args.shift();
-				var heroCredits = args.shift();
-				var heroSecRating = args.shift();
-				var heroStealth = args.shift();
-				var heroDetect = args.shift();
-				var heroAttack = args.shift();
-				var heroDefend = args.shift();
-				var heroCoding = args.shift();
-				var heroSnippets = args.shift();
-				var heroEEG = args.shift();
-				var heroWillpower = args.shift();
-				var heroStealthBonus = args.shift();
-				var heroAttackBonus = args.shift();
-				var heroMaxStorage = args.shift();
-				var heroMaxMemory = args.shift();
-				var heroDetectBonus = args.shift();
-				var heroDefendBonus = args.shift();
-				var heroDecking = args.shift();
 
-				hero.speed = heroSpeed * 1;
-				hero.roomId = heroRoom * 1;
-				hero.homeId = heroHome * 1;
-				hero.socketId = heroSocketId * 1;
-				hero.credits = heroCredits * 1;
-				hero.secrating = heroSecRating * 1;
-				hero.stealth = heroStealth * 1;
-				hero.detect = heroDetect * 1;
-				hero.attack = heroAttack * 1;
-				hero.defend = heroDefend * 1;
-				hero.coding = heroCoding * 1;
-				hero.snippets = heroSnippets * 1;
-				hero.eeg = heroEEG * 1;
-				hero.willpower = heroWillpower * 1;
-				hero.stealthBonus = heroStealthBonus * 1;
-				hero.attackBonus = heroAttackBonus * 1;
-				hero.maxStorage = heroMaxStorage * 1;
-				hero.maxMemory = heroMaxMemory * 1;
-				hero.detectBonus = heroDetectBonus * 1;
-				hero.defendBonus = heroDefendBonus * 1;
-				hero.decking = heroDecking * 1;
+			if (xcommand == 'INITP') {
+				hero.userId = xvalue.userId;
+				hero.speed = xvalue.speed;
+				hero.roomId = xvalue.roomId;
+				hero.homeId = xvalue.homeId;
+				hero.socketId = xvalue.socketId;
+				hero.credits = xvalue.credits;
+				hero.secrating = xvalue.secrating;
+				hero.stealth = xvalue.stealth;
+				hero.detect = xvalue.detect;
+				hero.attack = xvalue.attack;
+				hero.defend = xvalue.defend;
+				hero.coding = xvalue.coding;
+				hero.snippets = xvalue.snippets;
+				hero.eeg = xvalue.eeg;
+				hero.willpower = xvalue.willpower;
+				hero.stealthBonus = xvalue.stealthBonus;
+				hero.detectBonus = xvalue.detectBonus;
+				hero.attackBonus = xvalue.attackBonus;
+				hero.defendBonus = xvalue.defendBonus;
+				hero.maxStorage = xvalue.maxStorage;
+				hero.maxMemory = xvalue.maxMemory;
+				hero.decking = xvalue.decking;
+				hero.slots = xvalue.slots;
 
 				console.log(hero);
-
+				gameReady = true;
 			}
 
-			else if (command == 'NORTHEXIT') {
-				// received chat text
-				northExit = args.join(' ');
-			}
-			else if (command == 'EASTEXIT') {
-				// received chat text
-				eastExit = args.join(' ');
-			}
-			else if (command == 'SOUTHEXIT') {
-				// received chat text
-				southExit = args.join(' ');
-			}
-			else if (command == 'WESTEXIT') {
-				// received chat text
-				westExit = args.join(' ');
+			else if (xcommand == 'ADDBULLET') {
+				bullets.push({
+					currentX: xvalue.currentX,
+					currentY: xvalue.currentY,
+					targetX: xvalue.targetX,
+					targetY: xvalue.targetY,
+					trajX: xvalue.trajX,
+					trajY: xvalue.trajY,
+					userId: xvalue.userId,
+					roomId: xvalue.roomId
+				});
 			}
 
-
-			else if (command == 'ADDTOSTORAGE') {
-				// received chat text
-				var memProgId = args.shift();
-				var memProgUserId = args.shift();
-				var memProgType = args.shift();
-				var memProgRating = args.shift();
-				var memProgCondition = args.shift();
-				var memProgMaxUpgrades = args.shift();
-				var memProgUpgrades = args.shift();
-				var memProgName = args.join(' ');
-
-				if (!storagePrograms[memProgId]) {
-					storagePrograms[memProgId] = {
-						id: memProgId * 1,
-						userId: memProgUserId * 1,
-						type: memProgType,
-						rating: memProgRating * 1,
-						condition: memProgCondition * 1,
-						maxUpgrades: memProgMaxUpgrades * 1,
-						upgrades: memProgUpgrades * 1,
-						name: memProgName,
+			else if (xcommand == 'ADDTOSTORAGE') {
+				
+				if (!storagePrograms[xvalue.programId]) {
+					storagePrograms[xvalue.programId] = {
+						id: xvalue.programId,
+						userId: xvalue.userId,
+						type: xvalue.type,
+						rating: xvalue.rating,
+						condition: xvalue.condition,
+						maxUpgrades: xvalue.maxUpgrades,
+						upgrades: xvalue.upgrades,
+						name: xvalue.name,
 						loaded : 0
 					};
 				}
 
-				storagePrograms[memProgId].id = memProgId * 1;
-				storagePrograms[memProgId].userId = memProgUserId * 1;
-				storagePrograms[memProgId].type = memProgType;
-				storagePrograms[memProgId].rating = memProgRating * 1;
-				storagePrograms[memProgId].condition = memProgCondition * 1;
-				storagePrograms[memProgId].maxUpgrades = memProgMaxUpgrades * 1;
-				storagePrograms[memProgId].upgrades = memProgUpgrades * 1;
-				storagePrograms[memProgId].name = memProgName;
-				storagePrograms[memProgId].loaded = 0;
+				storagePrograms[xvalue.programId].id = xvalue.programId;
+				storagePrograms[xvalue.programId].userId = xvalue.userId;
+				storagePrograms[xvalue.programId].type = xvalue.type;
+				storagePrograms[xvalue.programId].rating = xvalue.rating;
+				storagePrograms[xvalue.programId].condition = xvalue.condition;
+				storagePrograms[xvalue.programId].maxUpgrades = xvalue.maxUpgrades;
+				storagePrograms[xvalue.programId].upgrades = xvalue.upgrades;
+				storagePrograms[xvalue.programId].name = xvalue.name;
+				storagePrograms[xvalue.programId].loaded = 0;
+
+				//console.log(storagePrograms);
 
 			}
 
-			else if (command == 'CHANGEATTACKBONUS') {
-				var attackBonusChange = args.shift();
+			else if (xcommand == 'CHAT') {
 				// received chat text
-				hero.attackBonus += attackBonusChange * 1;
-				if (hero.attackBonus > 10) {
-					hero.attackBonus = 10;
-				}
+				log(xvalue);
 			}
 
-			else if (command == 'CHANGEDETECTBONUS') {
-				var detectBonusChange = args.shift();
-				// received chat text
-				hero.detectBonus += detectBonusChange * 1;
-				if (hero.detectBonus > 10) {
-					hero.detectBonus = 10;
-				}
-			}
-
-			else if (command == 'CHANGEDEFENDBONUS') {
-				var defendBonusChange = args.shift();
-				// received chat text
-				hero.defendBonus += defendBonusChange * 1;
-				if (hero.defendBonus > 10) {
-					hero.defendBonus = 10;
-				}
-			}
-
-			else if (command == 'CHANGEEEG') {
-				var eegChange = args.shift();
-				// received chat text
-				hero.eeg -= eegChange;
-				if (hero.eeg < 0) {
-					hero.eeg = 0;
-				}
-			}
-
-			else if (command == 'CHANGESTEALTHBONUS') {
-				var stealthBonusChange = args.shift();
-				// received chat text
-				hero.stealthBonus += stealthBonusChange * 1;
-				if (hero.stealthBonus > 10) {
-					hero.stealthBonus = 10;
-				}
-			}
-			
-			else if (command == 'CHANGEWILLPOWER') {
-				var willpowerChange = args.shift();
-				// received chat text
-				hero.willpower -= willpowerChange;
-				if (hero.willpower < 0) {
-					hero.willpower = 0;
-				}
-			}
-			
-			else if (command == 'CREATEBULLET') {
-				// received chat text
-				var currentX = args.shift();
-				var currentY = args.shift();
-				var targetX = args.shift();
-				var targetY = args.shift();
-
-				bullets.push({
-					currentX: currentX * 1,
-					currentY: currentY * 1,
-					targetX: targetX * 1,
-					targetY: targetY * 1
-				});
-
-				console.log(bullets);
-
-				
-			}
-
-			else if (command == 'CREDITSCHANGE') {
-				// received chat text
-				var creditsChange = args.shift();
+			else if (xcommand == 'CREDITSCHANGE') {
+				var creditsChange = xvalue;
 				hero.credits -= creditsChange;
 				if (hero.credits < 0) {
 					hero.credits = 0;
 				}
 			}
 
-			else if (command == 'DAMAGEVIRUS') {
-				var damagedVirusId = args.shift();
-				var virusDamageAmount = args.shift();
+			else if (xcommand == 'LOADPROGRAM') {
 				// received chat text
-				if (otherEntities[damagedVirusId]) {
-					otherEntities[damagedVirusId].eeg -= virusDamageAmount;
-					if (otherEntities[damagedVirusId].eeg < 0) {
-						otherEntities[damagedVirusId].eeg = 0;
-					}
-				}
-			}
-
-			else if (command == 'FLATLINE') {
-				progressBar = 0;
-				barOriginal = progressBar;
-				barCommand = '';
-				barParam = '';
-
-				hero.eeg = 100;
-				hero.willpower = 100;
-				hero.secrating = 0;
-
-				send('ROOMUPDATE');
-			}
-
-			else if (command == 'FLATLINEVIRUS') {
-				var flatlinedVirusId = args.shift();
-				// received chat text
-				if (otherEntities[flatlinedVirusId]) {
-					delete otherEntities[flatlinedVirusId];
-				}
-			}
-
-			else if (command == 'LOADPROGRAM') {
-				// received chat text
-				var loadProgId = args.shift();
+				var loadProgId = xvalue;
 				storagePrograms[loadProgId].loaded = 1;
 				if (memoryPrograms[loadProgId]) {
 					memoryPrograms[loadProgId].id = loadProgId;
@@ -250,218 +116,283 @@ function parseReply( text ) {
 						type: storagePrograms[loadProgId].type
 					};
 				}
+				++usedSlots;
+				pageArray = [];
+				currentPage = 1;
+				maxPage = 1;
 			}
 
-			else if (command == 'OTHERENTITY') {
-				//console.log('other entity spotted');
-				var otherEntityId = args.shift();
-				var otherEntityX = args.shift();
-				var otherEntityY = args.shift();
-				var otherEntityRoom = args.shift();
-				var otherEntityEEG = args.shift();
-				var otherEntityType = args.join(' ');
+			else if (xcommand == 'OTHERENTITY') {
 
-				if (!otherEntities[otherEntityId]) {
-					otherEntities[otherEntityId] = {
-						id: otherEntityId * 1,
-						x: otherEntityX * 1,
-						y: otherEntityY * 1,
-						roomId: otherEntityRoom * 1,
-						eeg: otherEntityEEG * 1,
-						type: otherEntityType
+				//console.log('entity found');
+
+				if (!otherEntities[xvalue.id]) {
+					//console.log('entity does not exists');
+					otherEntities[xvalue.id] = {
+						id: xvalue.id,
+						x: xvalue.x,
+						y: xvalue.y,
+						roomId: xvalue.roomId,
+						eeg: xvalue.eeg,
+						userId: xvalue.userId,
+						type: xvalue.type
 					};
 				}
 
-				otherEntities[otherEntityId].id = otherEntityId * 1;
-				otherEntities[otherEntityId].x = otherEntityX * 1;
-				otherEntities[otherEntityId].y = otherEntityY * 1;
-				otherEntities[otherEntityId].roomId = otherEntityRoom * 1;
-				otherEntities[otherEntityId].eeg = otherEntityEEG * 1;
-				otherEntities[otherEntityId].type = otherEntityType;
+				otherEntities[xvalue.id].id = xvalue.id;
+				otherEntities[xvalue.id].x = xvalue.x;
+				otherEntities[xvalue.id].y = xvalue.y;
+				otherEntities[xvalue.id].roomId = xvalue.roomId;
+				otherEntities[xvalue.id].eeg = xvalue.eeg;
+				otherEntities[xvalue.id].userId = xvalue.userId;
+				otherEntities[xvalue.id].type = xvalue.type;
 
-				//console.log(otherEntities[otherEntityId]);
+				//console.log(otherEntities);
 			}
-			
-			else if (command == 'OTHERUSER') {
-				//console.log('other user spotted');
-				var otherUserSocketId = args.shift();
-				var otherUserX = args.shift();
-				var otherUserY = args.shift();
-				var otherUserRoom = args.shift();
 
-				if (!otherUsers[otherUserSocketId]) {
-					otherUsers[otherUserSocketId] = {
-						socketId: otherUserSocketId,
-						x: otherUserX,
-						y: otherUserY,
-						roomId: otherUserRoom
+			else if (xcommand == 'OTHERUSER') {
+
+				if (!otherUsers[xvalue.socketId]) {
+					otherUsers[xvalue.socketId] = {
+					userId: xvalue.userId,
+					speed: xvalue.speed,
+					roomId: xvalue.roomId,
+					homeId: xvalue.homeId,
+					socketId: xvalue.socketId,
+					credits: xvalue.socketId,
+					secrating: xvalue.secrating,
+					stealth: xvalue.stealth,
+					detect: xvalue.detect,
+					attack: xvalue.attack,
+					defend: xvalue.defend,
+					coding: xvalue.coding,
+					snippets: xvalue.snippets,
+					eeg: xvalue.eeg,
+					willpower: xvalue.willpower,
+					stealthBonus: xvalue.stealthBonus,
+					detectBonus: xvalue.detectBonus,
+					attackBonus: xvalue.attackBonus,
+					defendBonus: xvalue.defendBonus,
+					maxStorage: xvalue.maxStorage,
+					maxMemory: xvalue.maxMemory,
+					decking: xvalue.decking,
+					slots: xvalue.slots,
+					x: xvalue.x,
+					y: xvalue.y
 					};
 				}
 
-				otherUsers[otherUserSocketId].socketId = otherUserSocketId;
-				otherUsers[otherUserSocketId].x = otherUserX;
-				otherUsers[otherUserSocketId].y = otherUserY;
-				otherUsers[otherUserSocketId].roomId = otherUserRoom;
+				//console.log(otherUsers[xvalue.socketId]);
+
+				otherUsers[xvalue.socketId].userId = xvalue.userId;
+				otherUsers[xvalue.socketId].speed = xvalue.speed;
+				otherUsers[xvalue.socketId].roomId = xvalue.roomId;
+				otherUsers[xvalue.socketId].homeId = xvalue.homeId;
+				otherUsers[xvalue.socketId].socketId = xvalue.socketId;
+				otherUsers[xvalue.socketId].credits = xvalue.socketId;
+				otherUsers[xvalue.socketId].secrating = xvalue.secrating;
+				otherUsers[xvalue.socketId].stealth = xvalue.stealth;
+				otherUsers[xvalue.socketId].detect = xvalue.detect;
+				otherUsers[xvalue.socketId].attack = xvalue.attack;
+				otherUsers[xvalue.socketId].defend = xvalue.defend;
+				otherUsers[xvalue.socketId].coding = xvalue.coding;
+				otherUsers[xvalue.socketId].snippets = xvalue.snippets;
+				otherUsers[xvalue.socketId].eeg = xvalue.eeg;
+				otherUsers[xvalue.socketId].willpower = xvalue.willpower;
+				otherUsers[xvalue.socketId].stealthBonus = xvalue.stealthBonus;
+				otherUsers[xvalue.socketId].detectBonus = xvalue.detectBonus;
+				otherUsers[xvalue.socketId].attackBonus = xvalue.attackBonus;
+				otherUsers[xvalue.socketId].defendBonus = xvalue.defendBonus;
+				otherUsers[xvalue.socketId].maxStorage = xvalue.maxStorage;
+				otherUsers[xvalue.socketId].maxMemory = xvalue.maxMemory;
+				otherUsers[xvalue.socketId].decking = xvalue.decking;
+				otherUsers[xvalue.socketId].slots = xvalue.slots;
+				otherUsers[xvalue.socketId].x = xvalue.x;
+				otherUsers[xvalue.socketId].y = xvalue.y;
 
 				//console.log(otherUsers);
 			}
 
-			else if (command == 'PROGRESSBAR') {
-				progressBar = args.shift();
+			else if (xcommand == 'RAISEBONUS') {
+				var bonusType = xvalue.type;
+				var bonusChange = xvalue.amount;
+				//hero[bonusType] += bonusChange;
+				var bonusTypeAttr = bonusType + 'Bonus';
+				hero[bonusTypeAttr] += bonusChange;
 			}
 
-			else if (command == 'RAISEEEG') {
-				var eegRaise = args.shift();
-				// received chat text
+			else if (xcommand == 'RAISEEEG') {
+				var eegRaise = xvalue;
 				hero.eeg += (eegRaise * 1);
 				if (hero.eeg > 100) {
 					hero.eeg = 100;
 				}
 			}
 
-			else if (command == 'RAISEMAXMEMORY') {
-				var maxMemoryRaise = args.shift();
-				// received chat text
-				hero.maxMemory = hero.maxMemory + (maxMemoryRaise * 1);
+			else if (xcommand == 'RAISEMAXMEMORY') {
+				var maxMemoryRaise = xvalue;
+				hero.maxMemory = hero.maxMemory + maxMemoryRaise;
 			}
 			
-			else if (command == 'RAISEMAXSTORAGE') {
-				var maxStorageRaise = args.shift();
-				// received chat text
-				hero.maxStorage = hero.maxStorage + (maxStorageRaise * 1);
+			else if (xcommand == 'RAISEMAXSTORAGE') {
+				var maxStorageRaise = xvalue;
+				hero.maxStorage = hero.maxStorage + maxStorageRaise;
 			}
 
-			else if (command == 'RECALL') {
+			else if (xcommand == 'RECALL') {
 				bullets = [];
-				send('ROOMUPDATE');
+				var serverCommand = {
+					xcommand: 'ROOMUPDATE',
+					value: 0
+				};
+				send(JSON.stringify(serverCommand));
 			}
 
-			else if (command == 'REDUCEATTACKBONUS') {
-				var attackBonusReduction = args.shift();
-				// received chat text
-				hero.attackBonus -= attackBonusReduction * 1;
-				if (hero.attackBonus < 0) {
-					hero.attackBonus = 0;
+			else if (xcommand == 'REDUCEBONUS') {
+				var malusType = xvalue.type;
+				var malusChange = xvalue.amount;
+				//hero[malusType] -= malusChange;
+				var malusTypeAttr = malusType + 'Bonus';
+				hero[malusTypeAttr] -= malusChange;
+				//console.log('stat changed');
+			}
+
+			else if (xcommand == 'REDUCEEEG') {
+				var eegReduction = xvalue;
+				hero.eeg -= (eegReduction * 1);
+				if (hero.eeg < 0) {
+					hero.eeg = 0;
 				}
 			}
 
-			else if (command == 'REDUCEDEFENDBONUS') {
-				var defendBonusReduction = args.shift();
-				// received chat text
-				hero.defendBonus -= defendBonusReduction * 1;
-				if (hero.defendBonus < 0) {
-					hero.defendBonus = 0;
-				}
-			}
-
-			else if (command == 'REDUCEDETECTBONUS') {
-				var detectBonusReduction = args.shift();
-				// received chat text
-				hero.detectBonus -= detectBonusReduction * 1;
-				if (hero.detectBonus < 0) {
-					hero.detectBonus = 0;
-				}
-			}
-						
-			else if (command == 'REDUCEMAXMEMORY') {
-				var maxMemoryReduction = args.shift();
-				// received chat text
+			else if (xcommand == 'REDUCEMAXMEMORY') {
+				var maxMemoryReduction = xvalue;
 				hero.maxMemory -= maxMemoryReduction * 1;
 				if (hero.maxMemory < 0) {
 					hero.maxMemory = 0;
 				}
 			}
 			
-			else if (command == 'REDUCEMAXSTORAGE') {
-				var maxStorageReduction = args.shift();
-				// received chat text
-				hero.maxStorage -= maxStorageReduction * 1;
+			else if (xcommand == 'REDUCEMAXSTORAGE') {
+				var maxStorageReduction = xvalue;
+				hero.maxStorage -= maxStorageReduction;
 				if (hero.maxStorage < 0) {
 					hero.maxStorage = 0;
 				}
 			}
 
-			else if (command == 'REDUCEPROGCOND') {
-				var condRedProgId = args.shift();
-				// received chat text
+			else if (xcommand == 'REDUCEPROGCOND') {
+				var condRedProgId = xvalue;
 				storagePrograms[condRedProgId].condition -= 1;
-			}
-
-			else if (command == 'REDUCESTEALTHBONUS') {
-				var stealthBonusReduction = args.shift();
-				// received chat text
-				hero.stealthBonus -= stealthBonusReduction * 1;
-				if (hero.stealthBonus < 0) {
-					hero.stealthBonus = 0;
+				if (storagePrograms[condRedProgId].condition < 0) {
+					storagePrograms[condRedProgId].condition = 0;
 				}
 			}
 
-			else if (command == 'REMOVEUSER') {
-				var removeUserSocketId = args.shift();
-				if (otherUsers[removeUserSocketId]) {
-					otherUsers[removeUserSocketId].x = -9999;
-					otherUsers[removeUserSocketId].y = -9999;
-				}
-			}
-
-			else if (command == 'RESETPROGRESS') {
+			else if (xcommand == 'RESETPROGRESS') {
 				progressBar = 0;
 				barOriginal = progressBar;
 				barCommand = '';
 				barParam = '';
 			}
 
-			else if (command == 'ROOMID') {
-				// received chat text
-				roomId = args.join(' ');
-				hero.roomId = roomId;
-				//console.log('ROOMUPDATE');
+			else if (xcommand == 'ROOMUPDATE') {
+				closeAllMenus();
+				roomName = xvalue.name;
+				roomType = xvalue.type;
+				roomOwner = xvalue.owner;
+				roomLevel = xvalue.level;
+				roomId = xvalue.roomId;
+				northExit = xvalue.northExit;
+				eastExit = xvalue.eastExit;
+				southExit = xvalue.southExit;
+				westExit = xvalue.westExit;
+				hero.roomId = xvalue.roomId;
 			}
 
-			else if (command == 'ROOMLEVEL') {
-				// received chat text
-				roomLevel = args.join(' ');
-			}
-
-			else if (command == 'ROOMNAME') {
-				// received chat text
-				roomName = args.join(' ');
-			}
-
-			else if (command == 'ROOMOWNER') {
-				// received chat text
-				roomOwner = args.join(' ');
-			}
-
-			else if (command == 'ROOMTYPE') {
-				// received chat text
-				roomType = args.join(' ');
-			}
-
-			else if (command == 'SNIPPETSCHANGE') {
-				// received chat text
-				var snippetsChange = args.shift();
+			else if (xcommand == 'SNIPPETSCHANGE') {
+				var snippetsChange = xvalue;
 				hero.snippets -= snippetsChange;
 				if (hero.snippets < 0) {
 					hero.snippets = 0;
 				}
 			}
-			
-			else if (command == 'SYSMSG') {
-				// received chat text
-				chatMessage = args.join(' ');
+
+			else if (xcommand == 'SYSMSG') {
+				// received msg text
+				chatMessage = xvalue;
 				log(chatMessage);
 			}
 
-			else if (command == 'UNLOADPROGRAM') {
-				var unloadedProgram = args.shift();
-				// received chat text
+			else if (xcommand == 'UNLOADPROGRAM') {
+				var unloadedProgram = xvalue;
 				if (storagePrograms[unloadedProgram]) {
 					storagePrograms[unloadedProgram].loaded = 0;
 					if (memoryPrograms[unloadedProgram]) {
 						delete memoryPrograms[unloadedProgram];
+						--usedSlots;
 					}
 				}
+			}
+			
+			else if (xcommand == 'CREATEBULLET') {
+				// received chat text
+				var bulletUserId = args.shift();
+				var currentX = args.shift();
+				var currentY = args.shift();
+				var targetX = args.shift();
+				var targetY = args.shift();
+
+				var trajX = targetX - currentX;
+				var trajY = targetY - currentY;
+
+
+				bullets.push({
+					currentX: currentX * 1,
+					currentY: currentY * 1,
+					targetX: targetX * 1,
+					targetY: targetY * 1,
+					trajX: trajX,
+					trajY: trajY,
+					userId: bulletUserId * 1
+				});
+
+				//console.log(bullets);
+
+				
+			}
+
+			else if (xcommand == 'FLATLINE') {
+				progressBar = 0;
+				barOriginal = progressBar;
+				barCommand = '';
+				barParam = '';
+
+				hero.eeg = 100;
+				hero.willpower = 100;
+				hero.secrating = 0;
+
+				var serverCommandFL = {
+					xcommand: 'ROOMUPDATE',
+					value: 0
+				};
+				send(JSON.stringify(serverCommandFL));
+			}
+
+			else if (command == 'PROGRESSBAR') {
+				progressBar = args.shift();
+			}
+						
+			else if (xcommand == 'REMOVEUSER') {
+				var removeUserSocketId = xvalue;
+				if (otherUsers[removeUserSocketId]) {
+					otherUsers[removeUserSocketId].x = -9999;
+					otherUsers[removeUserSocketId].y = -9999;
+				}
+			}
+
+			else {
+				console.log('unknown command received: ' + text);
 			}
 
 		}

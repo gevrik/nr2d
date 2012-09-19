@@ -7,9 +7,32 @@
 		holygrail = passedHolygrail;
 		username = passedUsername;
 
-		canvas.width = 512;
-		canvas.height = 512;
+		canvas.width = 800;
+		canvas.height = 640;
 		$('.mainContent').prepend(canvas);
+
+
+		// mouse coord fetcher
+		function getMousePos(canvas, evt) {
+			var rect = canvas.getBoundingClientRect();
+
+			// return relative mouse position
+			var mouseX = evt.clientX - rect.left;
+			var mouseY = evt.clientY - rect.top;
+
+			//console.log(mouseX);
+			//console.log(mouseY);
+
+			ctx.beginPath();
+			ctx.arc(mouseX, mouseY, 4, 0, 2 * Math.PI, false);
+			ctx.fillStyle = "rgb(255, 0, 0)";
+			ctx.fill();
+
+			return {
+				x: mouseX,
+				y: mouseY
+			};
+		}
 
 		canvasEffects.width = canvas.width ;
 		canvasEffects.height = canvas.height;
@@ -35,11 +58,19 @@
 
 		// websocket
 		log('> connecting...');
-		Server = new FancyWebSocket('ws://totalmadownage.de:9300');
+		Server = new FancyWebSocket('ws://127.0.0.1:9300');
+		//Server = new FancyWebSocket('ws://totalmadownage.de:9300');
 
 		$('#message').keypress(function(e) {
 			if ( e.keyCode == 13 && this.value ) {
-				send( 'CHAT ' + username + ': ' + this.value );
+
+
+				var serverMessage = {
+					xcommand: 'CHAT',
+					xvalue: username + ': ' + this.value
+				};
+
+				send( JSON.stringify(serverMessage) );
 
 				$(this).val('');
 			}
@@ -48,12 +79,23 @@
 		//Let the user know we're connected
 		Server.bind('open', function() {
 			log( "> connected" );
-			// Let's play this game!
 			reset();
 			then = Date.now();
+
+			var serverMessage = {
+				xcommand: 'INITP',
+				xvalue: holygrail
+			};
+			send(JSON.stringify(serverMessage));
+
 			setInterval(main, 40);
-			send('INITP ' + holygrail);
-			send('ROOMUPDATE');
+
+			serverMessage = {
+				xcommand: 'ROOMUPDATE',
+				xvalue: 0
+			};
+
+			send(JSON.stringify(serverMessage));
 		});
 
 		//OH NOES! Disconnection occurred.
@@ -73,6 +115,90 @@
 		window.onbeforeunload = function() {
 			return "You will be disconnected if you refresh the page. This will unload all of your programs from active memory in the game. You for serious?";
 		};
+
+		// block inputs if chat input has focus
+		$('.message').focus(function() {
+			blockControls = true;
+		});
+
+		$('.message').blur(function() {
+			blockControls = false;
+		});
+
+		canvas.addEventListener('click', function(evt) {
+
+			var mousePos = getMousePos(canvas, evt);
+			//console.log(mousePos);
+
+			var currentX = hero.x;
+			var currentY = hero.y;
+			var targetX = mousePos.x;
+			var targetY = mousePos.y;
+
+
+			var angle = Math.atan2(targetY - hero.y, targetX - hero.x) * 180 / Math.PI;
+
+			if (angle < 0) {
+				angle = 360 + angle;
+			}
+
+			if (angle > 315 || angle < 45) {
+				//console.log('shoot right');
+				targetX = hero.x + hero.speed;
+				targetY = hero.y;
+			}
+			else if( angle > 45 && angle < 135)
+			{
+				//console.log('shoot down');
+				targetX = hero.x;
+				targetY = hero.y + hero.speed;
+			}
+			else if( angle > 135 && angle < 225)
+			{
+				//console.log('shoot left');
+				targetX = hero.x - hero.speed;
+				targetY = hero.y;
+			}
+			else if( angle > 225 && angle < 315)
+			{
+				//console.log('shoot up');
+				targetX = hero.x;
+				targetY = hero.y - hero.speed;
+			}
+
+			var trajX = targetX - currentX;
+			var trajY = targetY - currentY;
+			//console.log(angle);
+
+			bullets.push({
+				currentX: currentX,
+				currentY: currentY,
+				targetX: targetX,
+				targetY: targetY,
+				trajX: trajX,
+				trajY: trajY,
+				userId: holygrail,
+				roomId: hero.roomId * 1
+			});
+
+			var serverMessage = {
+				xcommand: 'ADDBULLET',
+				xvalue: {
+					currentX: currentX,
+					currentY: currentY,
+					targetX: targetX,
+					targetY: targetY,
+					trajX: trajX,
+					trajY: trajY,
+					userId: holygrail,
+					roomId: hero.roomId * 1
+				}
+			};
+			send( JSON.stringify(serverMessage) );
+
+			console.log(bullets);
+
+		}, false);
 
     };
 

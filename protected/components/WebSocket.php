@@ -265,7 +265,7 @@ class WebSocket
 
 		$nextPingCheck = time() + 1;
 		$nextSpawnCheck = time() + 300;
-		$nextMobCheck = time() + 2;
+		$nextMobCheck = time() + 5;
 		while (isset($this->wsRead[0])) {
 			$changed = $this->wsRead;
 			$result = socket_select($changed, $write, $except, 1);
@@ -328,7 +328,7 @@ class WebSocket
 
 			if (time() >= $nextMobCheck) {
 				$this->wsMobStuff();
-				$nextMobCheck = time() + 2;
+				$nextMobCheck = time() + 5;
 			}
 
 		}
@@ -904,89 +904,93 @@ class WebSocket
 		echo date('Y-m-d H:i:s: ') . $message . "\n";
 	}
 
+	// function wsMobStuff()
+	// {
+	// 	srand();
+	// 	date_default_timezone_set('Europe/Berlin');
+	//     //$this->log('mobcheck!');
+
+	// 	foreach ($this->wsClients as $id => $client) {
+	// 		if (isset($this->wsUsers[$id])) {
+	// 		//$this->log('found player!');
+	// 			foreach ($this->wsEntities as $entityId => $entityObject) {
+	// 				if ($this->wsEntities[$entityId]['roomId'] == $this->wsUsers[$id]['roomId'] && $this->wsEntities[$entityId]['eeg'] > 0){
+	// 					//$this->log('player in same room as entity!');
+
+	// 					if ($this->wsEntities[$entityId]['type'] == 'bouncer') {
+							
+	// 						if ($this->wsEntities[$entityId]['userId'] != $this->wsUsers[$id]['userId']) {
+	// 							$pStealth = $this->wsUsers[$id]['stealth'] + $this->wsUsers[$id]['stealthBonus'];
+	// 							$eDetect = $this->wsEntities[$entityId]['userId'];
+
+	// 							$skillRoll = rand(2, 20) + $eDetect - $pStealth;
+
+	// 							if ($skillRoll >= 11) {
+
+	// 								foreach ($this->wsClients as $recipId => $recipClient) {
+	// 									if ($this->wsUsers[$recipId]['roomId'] ==  $this->wsEntities[$entityId]['roomId']) {
+	// 										$this->wsSend($recipId, 'CREATEBULLET ' . $this->wsEntities[$entityId]['userId'] . ' ' . round($this->wsEntities[$entityId]['x']) . ' ' . round($this->wsEntities[$entityId]['y']) . ' ' . round($this->wsUsers[$id]['x']) . ' ' . round($this->wsUsers[$id]['y']));
+	// 									}
+	// 								}
+	// 								//$this->wsSend($id, 'SYSMSG A bouncer ICE detected you!');
+	// 								$this->wsUsers[$id]['willpower'] -= 1;
+									
+	// 								if ($this->wsUsers[$id]['willpower'] < 0) {
+	// 									//player flatlined
+	// 									$this->flatlinePlayer($id);
+	// 								}
+	// 								else {
+	// 									$this->wsSend($id, 'CHANGEWILLPOWER 1');
+	// 									$userObject = User::model()->findByPk($this->wsUsers[$id]['userId']);
+	// 									$profileObject = $userObject->profile;
+	// 									$profileObject->willpower -= 1;
+	// 									$profileObject->save(false);
+	// 								}
+
+	// 							}
+	// 						}
+
+	// 					}
+
+	// 					if ($this->wsEntities[$entityId]['type'] == 'default') {
+	// 						$pStealth = $this->wsUsers[$id]['stealth'] + $this->wsUsers[$id]['stealthBonus'];
+	// 						$eDetect = $this->wsEntities[$entityId]['userId'];
+
+	// 						$skillRoll = rand(2, 20) + $eDetect - $pStealth;
+
+	// 						if ($skillRoll >= 11) {
+	// 							foreach ($this->wsClients as $recipId => $recipClient) {
+	// 								if ($this->wsUsers[$recipId]['roomId'] ==  $this->wsEntities[$entityId]['roomId']) {
+	// 									$this->wsSend($recipId, 'CREATEBULLET 0 ' . round($this->wsEntities[$entityId]['x']) . ' ' . round($this->wsEntities[$entityId]['y']) . ' ' . round($this->wsUsers[$id]['x']) . ' ' . round($this->wsUsers[$id]['y']));
+	// 								}
+	// 							}
+	// 							//$this->wsSend($id, 'SYSMSG A Murphy Virus attacked you!');
+	// 							$this->wsUsers[$id]['eeg'] -= 1;
+	// 							if ($this->wsUsers[$id]['eeg'] < 0) {
+	// 								//player flatlined
+	// 								$this->flatlinePlayer($id);
+	// 							}
+	// 							else {
+	// 								$this->wsSend($id, 'CHANGEEEG 1');
+	// 								$userObject = User::model()->findByPk($this->wsUsers[$id]['userId']);
+	// 								$profileObject = $userObject->profile;
+	// 								$profileObject->eeg -= 1;
+	// 								$profileObject->save(false);
+	// 							}
+								
+	// 						}
+	// 					}
+
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+
+	// }
+
 	function wsMobStuff()
 	{
-		srand();
-		date_default_timezone_set('Europe/Berlin');
-	    //$this->log('mobcheck!');
-
-		foreach ($this->wsClients as $id => $client) {
-			if (isset($this->wsUsers[$id])) {
-			//$this->log('found player!');
-				foreach ($this->wsEntities as $entityId => $entityObject) {
-					if ($this->wsEntities[$entityId]['roomId'] == $this->wsUsers[$id]['roomId'] && $this->wsEntities[$entityId]['eeg'] > 0){
-						//$this->log('player in same room as entity!');
-
-						if ($this->wsEntities[$entityId]['type'] == 'bouncer') {
-							
-							if ($this->wsEntities[$entityId]['userId'] != $this->wsUsers[$id]['userId']) {
-								$pStealth = $this->wsUsers[$id]['stealth'] + $this->wsUsers[$id]['stealthBonus'];
-								$eDetect = $this->wsEntities[$entityId]['userId'];
-
-								$skillRoll = rand(2, 20) + $eDetect - $pStealth;
-
-								if ($skillRoll >= 11) {
-
-									foreach ($this->wsClients as $recipId => $recipClient) {
-										if ($this->wsUsers[$recipId]['roomId'] ==  $this->wsEntities[$entityId]['roomId']) {
-											$this->wsSend($recipId, 'CREATEBULLET ' . round($this->wsEntities[$entityId]['x']) . ' ' . round($this->wsEntities[$entityId]['y']) . ' ' . round($this->wsUsers[$id]['x']) . ' ' . round($this->wsUsers[$id]['y']));
-										}
-									}
-									//$this->wsSend($id, 'SYSMSG A bouncer ICE detected you!');
-									$this->wsUsers[$id]['willpower'] -= 1;
-									
-									if ($this->wsUsers[$id]['willpower'] < 0) {
-										//player flatlined
-										$this->flatlinePlayer($id);
-									}
-									else {
-										$this->wsSend($id, 'CHANGEWILLPOWER 1');
-										$userObject = User::model()->findByPk($this->wsUsers[$id]['userId']);
-										$profileObject = $userObject->profile;
-										$profileObject->willpower -= 1;
-										$profileObject->save(false);
-									}
-
-								}
-							}
-
-						}
-
-						if ($this->wsEntities[$entityId]['type'] == 'default') {
-							$pStealth = $this->wsUsers[$id]['stealth'] + $this->wsUsers[$id]['stealthBonus'];
-							$eDetect = $this->wsEntities[$entityId]['userId'];
-
-							$skillRoll = rand(2, 20) + $eDetect - $pStealth;
-
-							if ($skillRoll >= 11) {
-								//$this->log('bouncer spotted intruder!');
-								foreach ($this->wsClients as $recipId => $recipClient) {
-									if ($this->wsUsers[$recipId]['roomId'] ==  $this->wsEntities[$entityId]['roomId']) {
-										$this->wsSend($recipId, 'CREATEBULLET ' . round($this->wsEntities[$entityId]['x']) . ' ' . round($this->wsEntities[$entityId]['y']) . ' ' . round($this->wsUsers[$id]['x']) . ' ' . round($this->wsUsers[$id]['y']));
-									}
-								}
-								//$this->wsSend($id, 'SYSMSG A Murphy Virus attacked you!');
-								$this->wsUsers[$id]['eeg'] -= 1;
-								if ($this->wsUsers[$id]['eeg'] < 0) {
-									//player flatlined
-									$this->flatlinePlayer($id);
-								}
-								else {
-									$this->wsSend($id, 'CHANGEEEG 1');
-									$userObject = User::model()->findByPk($this->wsUsers[$id]['userId']);
-									$profileObject = $userObject->profile;
-									$profileObject->eeg -= 1;
-									$profileObject->save(false);
-								}
-								
-							}
-						}
-
-					}
-				}
-			}
-		}
-
+		
 	}
 
 	function wsCronStuff()

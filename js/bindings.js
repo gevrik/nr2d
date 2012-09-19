@@ -12,13 +12,7 @@ $(document).bind('keyup', 'b', function(){
 
 $(document).bind('keyup', 'c', function(){
 	if (!$('.message').hasFocus && progressBar === 0) {
-		showNodeMenu = false;
-		showMenu = false;
-		showMemoryMenu = false;
-		showStorageMenu = false;
-		showInventoryMenu = false;
-		showProgramMenu = false;
-		showVirusMenu = false;
+		closeAllMenus('char');
 		if (showCharMenu === false) {
 			showCharMenu = true;
 		} else {
@@ -29,16 +23,39 @@ $(document).bind('keyup', 'c', function(){
 
 $(document).bind('keyup', 'e', function(){
 	if (!$('.message').hasFocus && progressBar === 0) {
-		showNodeMenu = false;
-		showCharMenu = false;
-		showProgramMenu = false;
-		showMemoryMenu = false;
-		showStorageMenu = false;
-		showMenu = false;
-		showVirusMenu = false;
+		closeAllMenus('inventory');
 		if (showInventoryMenu === false) {
+
+			var programCounter = 0;
+			maxPage = 1;
+			currentPage = 1;
+
+			jQuery.each(storagePrograms, function(i, val) {
+				if (storagePrograms[i]) {
+					++programCounter;
+
+					pageArray.push({
+						id: storagePrograms[i].id,
+						page: currentPage,
+						hotkey: programCounter,
+						name: storagePrograms[i].name
+					});
+
+					if (programCounter % 9 === 0 ) {
+						++maxPage;
+						++currentPage;
+						
+						programCounter = 0;
+					}
+				}
+			});
+			currentPage = 1;
 			showInventoryMenu = true;
+			
 		} else {
+			pageArray = [];
+			currentPage = 1;
+			maxPage = 1;
 			showInventoryMenu = false;
 		}
 	}
@@ -58,13 +75,7 @@ $(document).bind('keyup', 'f', function(){
 
 $(document).bind('keyup', 'i', function(){
 	if (!$('.message').hasFocus && progressBar === 0) {
-		showNodeMenu = false;
-		showCharMenu = false;
-		showProgramMenu = false;
-		showMemoryMenu = false;
-		showStorageMenu = false;
-		showInventoryMenu = false;
-		showVirusMenu = false;
+		closeAllMenus('info');
 		if (showMenu === false) {
 			showMenu = true;
 		} else {
@@ -85,6 +96,19 @@ $(document).bind('keyup', 'k', function(){
 	}
 });
 
+$(document).bind('keyup', 'l', function(){
+	if (!$('.message').hasFocus) {
+		if (showItemMenu === true) {
+			progressBar = 2000;
+			barOriginal = progressBar;
+			barCommand = 'LOADPROGRAM';
+			barParam = showMemProgId;
+			showMemProgId = 0;
+			showItemMenu = false;
+		}
+	}
+});
+
 $(document).bind('keyup', 'n', function(){
 	if (!$('.message').hasFocus) {
 		if (showProgramMenu === true) {
@@ -93,6 +117,18 @@ $(document).bind('keyup', 'n', function(){
 			barCommand = 'CREATEPROGRAM';
 			barParam = 'antivirus';
 			showProgramMenu = false;
+		}
+		else if (showStorageMenu === true) {
+			if (currentPage < maxPage) {
+				++currentPage;
+			}
+			availableChoices = [];
+		}
+		else if (showInventoryMenu === true) {
+			if (currentPage < maxPage) {
+				++currentPage;
+			}
+			availableChoices = [];
 		}
 	}
 });
@@ -106,25 +142,66 @@ $(document).bind('keyup', 'p', function(){
 			barParam = 'detect';
 			showProgramMenu = false;
 		}
+		else if (showStorageMenu === true) {
+			--currentPage;
+			if (currentPage < 1) {
+				currentPage = 1;
+			}
+			availableChoices = [];
+		}
+		else if (showInventoryMenu === true) {
+			--currentPage;
+			if (currentPage < 1) {
+				currentPage = 1;
+			}
+			availableChoices = [];
+		}
 	}
 });
 
 
 $(document).bind('keyup', 'r', function(){
 	if (!$('.message').hasFocus && progressBar === 0) {
-		showNodeMenu = false;
-		showCharMenu = false;
-		showProgramMenu = false;
-		showInventoryMenu = false;
-		showMenu = false;
-		showStorageMenu = false;
-		showVirusMenu = false;
+		closeAllMenus('memory');
 		if (showMemoryMenu === false) {
 			showMemoryMenu = true;
 		}
 		else {
-			showMemoryMenu = false;
-			showStorageMenu = true;
+			if (usedSlots < hero.slots) {
+				showMemoryMenu = false;
+				var programCounter = 0;
+				currentPage = 1;
+				maxPage = 1;
+
+				jQuery.each(storagePrograms, function(i, val) {
+					if (storagePrograms[i]) {
+						if (storagePrograms[i].loaded != 1) {
+							if (getMemoryUsed() + storagePrograms[i].rating <= hero.maxMemory) {
+								++programCounter;
+
+								pageArray.push({
+									id: storagePrograms[i].id,
+									page: currentPage,
+									hotkey: programCounter,
+									name: storagePrograms[i].name
+								});
+
+								if (programCounter % 9 === 0 ) {
+									++maxPage;
+									++currentPage;
+									
+									programCounter = 0;
+								}
+							}
+						}
+					}
+				});
+				currentPage = 1;
+				showStorageMenu = true;
+			}
+			else {
+				showMemoryMenu = false;
+			}
 		}
 	}
 });
@@ -164,13 +241,7 @@ $(document).bind('keyup', 'u', function(){
 
 $(document).bind('keyup', 'v', function(){
 	if (!$('.message').hasFocus && progressBar === 0) {
-		showNodeMenu = false;
-		showCharMenu = false;
-		showProgramMenu = false;
-		showMemoryMenu = false;
-		showStorageMenu = false;
-		showInventoryMenu = false;
-		showMenu = false;
+		closeAllMenus('virus');
 		if (showVirusMenu === false) {
 			showVirusMenu = true;
 		} else {
@@ -181,16 +252,21 @@ $(document).bind('keyup', 'v', function(){
 
 $(document).bind('keyup', 'x', function(){
 	if (!$('.message').hasFocus) {
-		showMenu = false;
-		showNodeMenu = false;
-		showProgramMenu = false;
-		showCharMenu = false;
-		showMemoryMenu = false;
-		showStorageMenu = false;
-		showInventoryMenu = false;
-		showVirusMenu = false;
+		closeAllMenus();
 		availableChoices = [];
-		showItemMenu = false;
+		pageArray = [];
+		currentPage = 1;
+		maxPage = 1;
+	}
+});
+
+$(document).bind('keyup', 'esc', function(){
+	if (!$('.message').hasFocus) {
+		closeAllMenus();
+		availableChoices = [];
+		pageArray = [];
+		currentPage = 1;
+		maxPage = 1;
 	}
 });
 
@@ -203,12 +279,15 @@ $(document).bind('keyup', '1', function(){
 			showMenu = false;
 		}
 		else if (showItemMenu === true) {
-			progressBar = 1000;
-			barOriginal = progressBar;
-			barCommand = 'EXECUTEPROGRAM';
-			barParam = showMemProgId;
-			showMemProgId = 0;
-			showItemMenu = false;
+			if (canExecute) {
+				progressBar = 1000;
+				barOriginal = progressBar;
+				barCommand = 'EXECUTEPROGRAM';
+				barParam = showMemProgId;
+				showMemProgId = 0;
+				showItemMenu = false;
+				canExecute = false;
+			}
 		}
 		else if (showNodeMenu === true) {
 			progressBar = 10000;
@@ -219,12 +298,14 @@ $(document).bind('keyup', '1', function(){
 			showNodeMenu = false;
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[1].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[1]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[1].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showVirusMenu === true) {
 			if (availableChoices[1]) {
@@ -266,7 +347,6 @@ $(document).bind('keyup', '2', function(){
 			progressBar = 5000;
 			barOriginal = progressBar;
 			barCommand = 'CHATSUBO';
-			//send( 'CHATSUBO');
 			showMenu = false;
 		}
 		else if (showNodeMenu === true) {
@@ -278,12 +358,14 @@ $(document).bind('keyup', '2', function(){
 			showNodeMenu = false;
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[2].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[2]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[2].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[2].programId;
@@ -298,6 +380,16 @@ $(document).bind('keyup', '2', function(){
 			showInventoryMenu = false;
 			//console.log(showMemProgId);
 			showItemMenu = true;
+		}
+		else if (showVirusMenu === true) {
+			if (availableChoices[2]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'ATTACKVIRUS';
+				barParam = availableChoices[2].entityId + " " + getVirusDamage();
+				availableChoices = [];
+			}
+			showVirusMenu = false;
 		}
 	}
 });
@@ -321,12 +413,14 @@ $(document).bind('keyup', '3', function(){
 			showNodeMenu = false;
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[3].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[3]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[3].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[3].programId;
@@ -341,6 +435,16 @@ $(document).bind('keyup', '3', function(){
 			showInventoryMenu = false;
 			//console.log(showMemProgId);
 			showItemMenu = true;
+		}
+		else if (showVirusMenu === true) {
+			if (availableChoices[3]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'ATTACKVIRUS';
+				barParam = availableChoices[3].entityId + " " + getVirusDamage();
+				availableChoices = [];
+			}
+			showVirusMenu = false;
 		}
 	}
 });
@@ -364,12 +468,14 @@ $(document).bind('keyup', '4', function(){
 			showNodeMenu = false;
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[4].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[4]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[4].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[4].programId;
@@ -384,6 +490,16 @@ $(document).bind('keyup', '4', function(){
 			showInventoryMenu = false;
 			//console.log(showMemProgId);
 			showItemMenu = true;
+		}
+		else if (showVirusMenu === true) {
+			if (availableChoices[4]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'ATTACKVIRUS';
+				barParam = availableChoices[4].entityId + " " + getVirusDamage();
+				availableChoices = [];
+			}
+			showVirusMenu = false;
 		}
 	}
 });
@@ -403,16 +519,17 @@ $(document).bind('keyup', '5', function(){
 			barOriginal = progressBar;
 			barCommand = 'MODIFYNODE';
 			barParam = 'coding';
-			//send('MODIFYNODE coding');
 			showNodeMenu = false;
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[5].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[5]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[5].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[5].programId;
@@ -427,6 +544,16 @@ $(document).bind('keyup', '5', function(){
 			showInventoryMenu = false;
 			//console.log(showMemProgId);
 			showItemMenu = true;
+		}
+		else if (showVirusMenu === true) {
+			if (availableChoices[5]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'ATTACKVIRUS';
+				barParam = availableChoices[5].entityId + " " + getVirusDamage();
+				availableChoices = [];
+			}
+			showVirusMenu = false;
 		}
 	}
 });
@@ -442,12 +569,14 @@ $(document).bind('keyup', '6', function(){
 			showMenu = false;
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[6].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[6]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[6].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[6].programId;
@@ -462,6 +591,16 @@ $(document).bind('keyup', '6', function(){
 			showInventoryMenu = false;
 			//console.log(showMemProgId);
 			showItemMenu = true;
+		}
+		else if (showVirusMenu === true) {
+			if (availableChoices[6]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'ATTACKVIRUS';
+				barParam = availableChoices[6].entityId + " " + getVirusDamage();
+				availableChoices = [];
+			}
+			showVirusMenu = false;
 		}
 	}
 });
@@ -473,12 +612,14 @@ $(document).bind('keyup', '7', function(){
 			showNodeMenu = true;
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[7].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[7]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[7].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[7].programId;
@@ -493,6 +634,16 @@ $(document).bind('keyup', '7', function(){
 			showInventoryMenu = false;
 			//console.log(showMemProgId);
 			showItemMenu = true;
+		}
+		else if (showVirusMenu === true) {
+			if (availableChoices[7]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'ATTACKVIRUS';
+				barParam = availableChoices[7].entityId + " " + getVirusDamage();
+				availableChoices = [];
+			}
+			showVirusMenu = false;
 		}
 	}
 });
@@ -506,12 +657,14 @@ $(document).bind('keyup', '8', function(){
 			barCommand = 'UPGRADENODE';
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[8].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[8]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[8].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[8].programId;
@@ -526,6 +679,16 @@ $(document).bind('keyup', '8', function(){
 			showInventoryMenu = false;
 			//console.log(showMemProgId);
 			showItemMenu = true;
+		}
+		else if (showVirusMenu === true) {
+			if (availableChoices[8]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'ATTACKVIRUS';
+				barParam = availableChoices[8].entityId + " " + getVirusDamage();
+				availableChoices = [];
+			}
+			showVirusMenu = false;
 		}
 	}
 });
@@ -537,12 +700,14 @@ $(document).bind('keyup', '9', function(){
 			showProgramMenu = true;
 		}
 		else if (showStorageMenu === true) {
-			progressBar = 2000;
-			barOriginal = progressBar;
-			barCommand = 'LOADPROGRAM';
-			barParam = availableChoices[9].programId;
-			availableChoices = [];
-			showStorageMenu = false;
+			if (availableChoices[9]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'LOADPROGRAM';
+				barParam = availableChoices[9].programId;
+				availableChoices = [];
+				showStorageMenu = false;
+			}
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[9].programId;
@@ -557,6 +722,16 @@ $(document).bind('keyup', '9', function(){
 			showInventoryMenu = false;
 			//console.log(showMemProgId);
 			showItemMenu = true;
+		}
+		else if (showVirusMenu === true) {
+			if (availableChoices[9]) {
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'ATTACKVIRUS';
+				barParam = availableChoices[9].entityId + " " + getVirusDamage();
+				availableChoices = [];
+			}
+			showVirusMenu = false;
 		}
 	}
 });
