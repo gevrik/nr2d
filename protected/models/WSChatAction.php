@@ -145,19 +145,53 @@ class WSChatAction
                 }
             }
 
+            foreach ($Server->wsBullets as $bulletId => $bulletObject) {
+                if ($Server->wsBullets[$bulletId]['roomId'] == $Server->wsUsers[$clientID]['roomId'] ) {
+                    $returnCommand = array(
+                        'xcommand' => 'ADDBULLET',
+                        'xvalue' => $Server->wsBullets[$bulletId]
+                    );
+                }
+            }
+
         }
 
         else if ($xcommand == 'ADDBULLET') {
+            
+            $currentBullets = count($Server->wsBullets);
+            //$Server->log($currentBullets);
+            $Server->wsBullets[$currentBullets] = array(
+                'bulletId' => $currentBullets,
+                'currentX' => (int)$parsed->xvalue->currentX,
+                'currentY' => (int)$parsed->xvalue->currentY,
+                'targetX' => (int)$parsed->xvalue->targetX,
+                'targetY' => (int)$parsed->xvalue->targetY,
+                'userId' => (int)$parsed->xvalue->userId,
+                'trajX' => (int)$parsed->xvalue->trajX,
+                'trajY' => (int)$parsed->xvalue->trajY,
+                'roomId' => (int)$parsed->xvalue->roomId,
+                'hadImpact' => 0
+            );
+
             $returnCommand = array(
                 'xcommand' => 'ADDBULLET',
-                'xvalue' => $parsed->xvalue
+                'xvalue' => $Server->wsBullets[$currentBullets]
             );
 
             foreach ( $Server->wsClients as $id => $client ) {
-                if ($clientID != $id) {
-                    $Server->wsSend($id, json_encode($returnCommand));
-                }
+                $Server->wsSend($id, json_encode($returnCommand));
             }
+        }
+
+        else if ($xcommand == 'DELETEBULLET') {
+            $returnCommand = array(
+                'xcommand' => 'DELETEBULLET',
+                'xvalue' => $parsed->xvalue
+            );
+            foreach ( $Server->wsClients as $id => $client ) {
+                $Server->wsSend($id, json_encode($returnCommand));
+            }
+            unset($Server->wsBullets[$parsed->xvalue]);
         }
 
         else if ($xcommand == 'CHAT') {
@@ -382,6 +416,17 @@ class WSChatAction
                     $Server->wsSend($clientID, json_encode($returnCommand));
 
             }
+
+        }
+
+        else if ($xcommand == 'DAMAGEUSER') {
+            $damagedUserSocketId = $parsed->xvalue;
+
+            $returnCommand = array(
+                'xcommand' => 'REDUCEEEG',
+                'xvalue' => 1
+            );
+            $Server->wsSend($damagedUserSocketId, json_encode($returnCommand));
 
         }
 

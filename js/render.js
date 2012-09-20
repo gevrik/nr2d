@@ -92,7 +92,7 @@ var render = function () {
 		}
 
 		jQuery.each(bullets, function(i, val) {
-			if (bullets[i]) {
+			if (bullets[i] && bullets[i].roomId == hero.roomId) {
 				if (bulletReady) {
 					ctx.beginPath();
 					ctx.arc(bullets[i].currentX, bullets[i].currentY, 8, 0, 2 * Math.PI, false);
@@ -137,7 +137,7 @@ var render = function () {
 
 				ctx.beginPath();
 				ctx.arc(otherEntities[i].x, otherEntities[i].y, 16, 0, 2 * Math.PI, false);
-				ctx.fillStyle = "rgb(0, 0, 255)";
+				ctx.fillStyle = (otherEntities[i].userId == holygrail) ? "rgb(0, 255, 0)" : "rgb(255, 0, 0)";
 				ctx.fill();
 
 				if (monsterReady) {

@@ -43,16 +43,35 @@ function parseReply( text ) {
 			}
 
 			else if (xcommand == 'ADDBULLET') {
-				bullets.push({
-					currentX: xvalue.currentX,
-					currentY: xvalue.currentY,
-					targetX: xvalue.targetX,
-					targetY: xvalue.targetY,
-					trajX: xvalue.trajX,
-					trajY: xvalue.trajY,
-					userId: xvalue.userId,
-					roomId: xvalue.roomId
-				});
+				console.log(xvalue);
+				if (!bullets[xvalue.bulletId]) {
+					bullets[xvalue.bulletId] = {
+						id: xvalue.bulletId,
+						currentX: xvalue.currentX,
+						currentY: xvalue.currentY,
+						targetX: xvalue.targetX,
+						targetY: xvalue.targetY,
+						trajX: xvalue.trajX,
+						trajY: xvalue.trajY,
+						userId: xvalue.userId,
+						roomId: xvalue.roomId,
+						hadImpact: xvalue.hadImpact
+					};
+				}
+
+				bullets[xvalue.bulletId].id = xvalue.bulletId;
+				bullets[xvalue.bulletId].currentX = xvalue.currentX;
+				bullets[xvalue.bulletId].currentY = xvalue.currentY;
+				bullets[xvalue.bulletId].targetX = xvalue.targetX;
+				bullets[xvalue.bulletId].targetY = xvalue.targetY;
+				bullets[xvalue.bulletId].trajX = xvalue.trajX;
+				bullets[xvalue.bulletId].trajY = xvalue.trajY;
+				bullets[xvalue.bulletId].userId = xvalue.userId;
+				bullets[xvalue.bulletId].roomId = xvalue.roomId;
+				bullets[xvalue.bulletId].hadImpact = xvalue.hadImpact;
+
+
+				console.log(bullets);
 			}
 
 			else if (xcommand == 'ADDTOSTORAGE') {
@@ -96,6 +115,11 @@ function parseReply( text ) {
 				if (hero.credits < 0) {
 					hero.credits = 0;
 				}
+			}
+
+			else if (xcommand == 'DELETEBULLET') {
+				console.log('delete bullet');
+				delete bullets[xvalue];
 			}
 
 			else if (xcommand == 'LOADPROGRAM') {

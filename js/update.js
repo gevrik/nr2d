@@ -24,11 +24,20 @@ var update = function (modifier) {
 
 	}
 
+	if (baseAttackDelay > 0) {
+		console.log(baseAttackDelay);
+		baseAttackDelay -= 1;
+
+		if (baseAttackDelay < 0) {
+			baseAttackDelay = 0;
+		}
+
+	}
+
 	serverMessage = {
 		xcommand: 'UPDATEME',
 		xvalue: {x: hero.x, y: hero.y}
 	};
-
 	send(JSON.stringify(serverMessage));
 		
 	if (87 in keysDown) { // Player holding up
@@ -104,8 +113,8 @@ var update = function (modifier) {
 	jQuery.each(bullets, function(i, val) {
 		if (bullets[i]) {
 
-			bullets[i].currentX = bullets[i].currentX + (bullets[i].trajX * modifier);
-			bullets[i].currentY = bullets[i].currentY + (bullets[i].trajY * modifier);
+			bullets[i].currentX = bullets[i].currentX + (bullets[i].trajX * 2 *modifier);
+			bullets[i].currentY = bullets[i].currentY + (bullets[i].trajY * 2 *modifier);
 
 			if (bullets[i]) {
 
@@ -123,7 +132,71 @@ var update = function (modifier) {
 							) {
 								if (bullets[i]) {
 									//console.log(otherEntities[ie]);
-									delete bullets[i];
+									//delete bullets[i];
+									var serverMessage = {
+										xcommand: 'DELETEBULLET',
+										xvalue: i
+									};
+									send(JSON.stringify(serverMessage));
+								}
+							}
+						}
+					}
+
+				});
+
+				if (bullets[i]) {
+					if (
+						bullets[i].currentX <= (hero.x + 16) &&
+						hero.x <= (bullets[i].currentX + 16) &&
+						bullets[i].currentY <= (hero.y + 16) &&
+						hero.y <= (bullets[i].currentY + 16) &&
+						bullets[i].userId != hero.userId &&
+						bullets[i].roomId == hero.roomId
+					) {
+						if (bullets[i]) {
+							//console.log(otherEntities[ie]);
+							//delete bullets[i];
+							var serverMessage = {
+								xcommand: 'DELETEBULLET',
+								xvalue: i
+							};
+							send(JSON.stringify(serverMessage));
+							serverMessage = {
+								xcommand: 'DAMAGEUSER',
+								xvalue: hero.socketId
+							};
+							send(JSON.stringify(serverMessage));
+						}
+					}
+				}
+
+				jQuery.each(otherUsers, function(ie, vale) {
+
+					if (otherUsers[ie]) {
+
+						if (bullets[i]) {
+							if (
+								bullets[i].currentX <= (otherUsers[ie].x + 16) &&
+								otherUsers[ie].x <= (bullets[i].currentX + 16) &&
+								bullets[i].currentY <= (otherUsers[ie].y + 16) &&
+								otherUsers[ie].y <= (bullets[i].currentY + 16) &&
+								bullets[i].userId != otherUsers[ie].userId &&
+								bullets[i].roomId == otherUsers[ie].roomId
+							) {
+								if (bullets[i]) {
+									//console.log(otherEntities[ie]);
+									//delete bullets[i];
+									var serverMessage = {
+										xcommand: 'DELETEBULLET',
+										xvalue: i
+									};
+									send(JSON.stringify(serverMessage));
+									serverMessage = {
+										xcommand: 'DAMAGEUSER',
+										xvalue: otherUsers[ie].socketId
+									};
+									send(JSON.stringify(serverMessage));
 								}
 							}
 						}
@@ -139,7 +212,12 @@ var update = function (modifier) {
 						bullets[i].targetY <= (bullets[i].currentY + 8)
 					) {
 						if (bullets[i]) {
-							delete bullets[i];
+							//delete bullets[i];
+							var serverMessage = {
+								xcommand: 'DELETEBULLET',
+								xvalue: i
+							};
+							send(JSON.stringify(serverMessage));
 						}
 					}
 				}

@@ -2,6 +2,9 @@ var Server;
 var username;
 var holygrail;
 var gameReady = false;
+var combatMode = false;
+
+var baseAttackDelay = 20;
 
 var storagePrograms = [];
 var otherUsers = [];

@@ -135,68 +135,60 @@
 			var targetX = mousePos.x;
 			var targetY = mousePos.y;
 
+			if (combatMode === true && baseAttackDelay < 1) {
 
-			var angle = Math.atan2(targetY - hero.y, targetX - hero.x) * 180 / Math.PI;
+				var angle = Math.atan2(targetY - hero.y, targetX - hero.x) * 180 / Math.PI;
 
-			if (angle < 0) {
-				angle = 360 + angle;
-			}
-
-			if (angle > 315 || angle < 45) {
-				//console.log('shoot right');
-				targetX = hero.x + hero.speed;
-				targetY = hero.y;
-			}
-			else if( angle > 45 && angle < 135)
-			{
-				//console.log('shoot down');
-				targetX = hero.x;
-				targetY = hero.y + hero.speed;
-			}
-			else if( angle > 135 && angle < 225)
-			{
-				//console.log('shoot left');
-				targetX = hero.x - hero.speed;
-				targetY = hero.y;
-			}
-			else if( angle > 225 && angle < 315)
-			{
-				//console.log('shoot up');
-				targetX = hero.x;
-				targetY = hero.y - hero.speed;
-			}
-
-			var trajX = targetX - currentX;
-			var trajY = targetY - currentY;
-			//console.log(angle);
-
-			bullets.push({
-				currentX: currentX,
-				currentY: currentY,
-				targetX: targetX,
-				targetY: targetY,
-				trajX: trajX,
-				trajY: trajY,
-				userId: holygrail,
-				roomId: hero.roomId * 1
-			});
-
-			var serverMessage = {
-				xcommand: 'ADDBULLET',
-				xvalue: {
-					currentX: currentX,
-					currentY: currentY,
-					targetX: targetX,
-					targetY: targetY,
-					trajX: trajX,
-					trajY: trajY,
-					userId: holygrail,
-					roomId: hero.roomId * 1
+				if (angle < 0) {
+					angle = 360 + angle;
 				}
-			};
-			send( JSON.stringify(serverMessage) );
 
-			console.log(bullets);
+				if (angle > 315 || angle < 45) {
+					//console.log('shoot right');
+					targetX = hero.x + hero.speed;
+					targetY = hero.y;
+				}
+				else if( angle > 45 && angle < 135)
+				{
+					//console.log('shoot down');
+					targetX = hero.x;
+					targetY = hero.y + hero.speed;
+				}
+				else if( angle > 135 && angle < 225)
+				{
+					//console.log('shoot left');
+					targetX = hero.x - hero.speed;
+					targetY = hero.y;
+				}
+				else if( angle > 225 && angle < 315)
+				{
+					//console.log('shoot up');
+					targetX = hero.x;
+					targetY = hero.y - hero.speed;
+				}
+
+				var trajX = targetX - currentX;
+				var trajY = targetY - currentY;
+
+				var serverMessage = {
+					xcommand: 'ADDBULLET',
+					xvalue: {
+						currentX: currentX,
+						currentY: currentY,
+						targetX: targetX,
+						targetY: targetY,
+						trajX: trajX,
+						trajY: trajY,
+						userId: holygrail,
+						roomId: hero.roomId * 1
+					}
+				};
+				send( JSON.stringify(serverMessage) );
+
+				baseAttackDelay = 20;
+
+				//console.log(bullets);
+			}
 
 		}, false);
 

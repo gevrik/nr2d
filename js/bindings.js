@@ -241,11 +241,12 @@ $(document).bind('keyup', 'u', function(){
 
 $(document).bind('keyup', 'v', function(){
 	if (!$('.message').hasFocus && progressBar === 0) {
-		closeAllMenus('virus');
-		if (showVirusMenu === false) {
-			showVirusMenu = true;
-		} else {
-			showVirusMenu = false;
+		closeAllMenus();
+		if (combatMode === true) {
+			combatMode = false;
+		}
+		else {
+			combatMode = true;
 		}
 	}
 });
@@ -734,4 +735,11 @@ $(document).bind('keyup', '9', function(){
 			showVirusMenu = false;
 		}
 	}
+
+});
+
+$(document).bind('keyup', '0', function(){
+	console.log('hide chat');
+	$('.message').toggle();
+	$('.log').toggle();
 });
