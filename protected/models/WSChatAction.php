@@ -24,7 +24,25 @@ class WSChatAction
 
         if ($xcommand == 'INITP') {
 
-            $userObject = User::model()->findByPk($parsed->xvalue);
+            $hash = $parsed->xvalue;
+            $Server->log($hash);
+
+            $users = User::model()->findAll();
+            $foundUser = false;
+
+            foreach ($users as $user) {
+                if (hash('sha256', $user->id . 'netrunners') == $hash) {
+                    $foundUser = true;
+                    $userObject = $user;
+                }
+            }
+
+            if ($foundUser == false) {
+                $Server->wsClose($clientID);
+                return;
+            }
+
+            //$userObject = User::model()->findByPk($parsed->xvalue);
 
             $profileObject = $userObject->profile;
             $stealthBonus = 0;
@@ -73,7 +91,9 @@ class WSChatAction
                     'maxStorage' => $maxStorage,
                     'maxMemory' => $maxMemory,
                     'decking' => (int)$profileObject->decking,
-                    'slots' => (int)$profileObject->slots
+                    'slots' => (int)$profileObject->slots,
+                    'name' => $userObject->username,
+                    'attackspeed' => $userObject->profile->attackspeed
                 ),
             );
             $Server->wsSend($clientID, json_encode($returnCommand));
@@ -159,7 +179,6 @@ class WSChatAction
         else if ($xcommand == 'ADDBULLET') {
             
             $currentBullets = count($Server->wsBullets);
-            //$Server->log($currentBullets);
             $Server->wsBullets[$currentBullets] = array(
                 'bulletId' => $currentBullets,
                 'currentX' => (int)$parsed->xvalue->currentX,
@@ -173,13 +192,18 @@ class WSChatAction
                 'hadImpact' => 0
             );
 
+
             $returnCommand = array(
                 'xcommand' => 'ADDBULLET',
                 'xvalue' => $Server->wsBullets[$currentBullets]
             );
 
             foreach ( $Server->wsClients as $id => $client ) {
-                $Server->wsSend($id, json_encode($returnCommand));
+                //$Server->log('socket found');
+                if ($Server->wsUsers[$id]['roomId'] == $Server->wsBullets[$currentBullets]['roomId']) {
+                    $Server->wsSend($id, json_encode($returnCommand));
+                    $Server->log('bullet sent');
+                }
             }
         }
 
@@ -798,6 +822,7 @@ class WSChatAction
         else if ($xcommand == 'ROOMUPDATE') {
 
             $room = Room::model()->findByPk($Server->wsUsers[$clientID]['roomId']);
+            $Server->log($room->name);
             $roomOwnerName = ($room->userId == 0) ? 'System' : CHtml::encode($room->user->username);
 
             $northExit = $room->getExit('north');
@@ -957,6 +982,15 @@ class WSChatAction
             $Server->wsSend($clientID, json_encode($returnCommand));
         }
 
+        else if ($xcommand == 'UPDATEENTITY') {
+            $newX = $parsed->xvalue->newX;
+            $newY = $parsed->xvalue->newY;
+
+            $Server->wsEntities[$parsed->xvalue->entityId]['x'] = $newX;
+            $Server->wsEntities[$parsed->xvalue->entityId]['y'] = $newY;
+
+        }
+
         else if ($xcommand == 'UPDATEME') {
 
             $newX = $parsed->xvalue->x;
@@ -1025,7 +1059,13 @@ class WSChatAction
                             'roomId' => (int)$entity['roomId'],
                             'eeg' => (int)$entity['eeg'],
                             'userId' => (int)$entity['userId'],
-                            'type' => $entity['type']
+                            'type' => $entity['type'],
+                            'targetX' => $entity['targetX'],
+                            'targetY' => $entity['targetY'],
+                            'trajX' => $entity['trajX'],
+                            'trajY' => $entity['trajY'],
+                            'speed' => $entity['entity'],
+                            'moveTimer' => $entity['moveTimer']
                         )
                     );
 

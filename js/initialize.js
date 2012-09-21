@@ -4,7 +4,7 @@ var holygrail;
 var gameReady = false;
 var combatMode = false;
 
-var baseAttackDelay = 20;
+var baseAttackDelay = 0;
 
 var storagePrograms = [];
 var otherUsers = [];
@@ -22,15 +22,21 @@ var currentPage = 1;
 var maxPage = 1;
 var pageArray = [];
 
+var hash = '';
+
+var serverMessage;
+
 var showUrl = '/index.php/world/xhrShow';
 
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
 
-
 var canvasEffects = document.createElement("canvas");
 var ctxEffects = canvasEffects.getContext("2d");
+
+var canvasLog = document.createElement("canvas");
+var ctxLog = canvasLog.getContext("2d");
 
 // Game objects
 var hero = {
@@ -58,6 +64,10 @@ var showStorageMenu = false;
 var showInventoryMenu = false;
 var showVirusMenu = false;
 var showItemMenu = false;
+
+var showLog = false;
+var showLogTimer = 0;
+var logText = [];
 
 var progressBar = 0;
 var barOriginal = 0;

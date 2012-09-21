@@ -37,13 +37,18 @@ function parseReply( text ) {
 				hero.maxMemory = xvalue.maxMemory;
 				hero.decking = xvalue.decking;
 				hero.slots = xvalue.slots;
+				hero.name = xvalue.name;
+				hero.attackspeed = xvalue.attackspeed;
+
+				username = hero.name;
+				holygrail = hero.userId;
 
 				console.log(hero);
 				gameReady = true;
 			}
 
 			else if (xcommand == 'ADDBULLET') {
-				console.log(xvalue);
+				//console.log(xvalue);
 				if (!bullets[xvalue.bulletId]) {
 					bullets[xvalue.bulletId] = {
 						id: xvalue.bulletId,
@@ -59,19 +64,19 @@ function parseReply( text ) {
 					};
 				}
 
-				bullets[xvalue.bulletId].id = xvalue.bulletId;
-				bullets[xvalue.bulletId].currentX = xvalue.currentX;
-				bullets[xvalue.bulletId].currentY = xvalue.currentY;
-				bullets[xvalue.bulletId].targetX = xvalue.targetX;
-				bullets[xvalue.bulletId].targetY = xvalue.targetY;
-				bullets[xvalue.bulletId].trajX = xvalue.trajX;
-				bullets[xvalue.bulletId].trajY = xvalue.trajY;
-				bullets[xvalue.bulletId].userId = xvalue.userId;
-				bullets[xvalue.bulletId].roomId = xvalue.roomId;
-				bullets[xvalue.bulletId].hadImpact = xvalue.hadImpact;
+				// bullets[xvalue.bulletId].id = xvalue.bulletId;
+				// bullets[xvalue.bulletId].currentX = xvalue.currentX;
+				// bullets[xvalue.bulletId].currentY = xvalue.currentY;
+				// bullets[xvalue.bulletId].targetX = xvalue.targetX;
+				// bullets[xvalue.bulletId].targetY = xvalue.targetY;
+				// bullets[xvalue.bulletId].trajX = xvalue.trajX;
+				// bullets[xvalue.bulletId].trajY = xvalue.trajY;
+				// bullets[xvalue.bulletId].userId = xvalue.userId;
+				// bullets[xvalue.bulletId].roomId = xvalue.roomId;
+				// bullets[xvalue.bulletId].hadImpact = xvalue.hadImpact;
 
 
-				console.log(bullets);
+				//console.log(bullets);
 			}
 
 			else if (xcommand == 'ADDTOSTORAGE') {
@@ -106,6 +111,12 @@ function parseReply( text ) {
 
 			else if (xcommand == 'CHAT') {
 				// received chat text
+				showLog = true;
+				showLogTimer = 125;
+				logText.unshift({xvalue: xvalue});
+				if (logText.length > 10) {
+					logText.pop();
+				}
 				log(xvalue);
 			}
 
@@ -118,7 +129,7 @@ function parseReply( text ) {
 			}
 
 			else if (xcommand == 'DELETEBULLET') {
-				console.log('delete bullet');
+				//console.log('delete bullet');
 				delete bullets[xvalue];
 			}
 
@@ -159,18 +170,24 @@ function parseReply( text ) {
 						roomId: xvalue.roomId,
 						eeg: xvalue.eeg,
 						userId: xvalue.userId,
-						type: xvalue.type
+						type: xvalue.type,
+						targetX: xvalue.targetX,
+						targetY: xvalue.targetY,
+						trajX: xvalue.trajX,
+						trajY: xvalue.trajY,
+						speed: xvalue.speed,
+						moveTimer: 0
 					};
 				}
 
 				otherEntities[xvalue.id].id = xvalue.id;
-				otherEntities[xvalue.id].x = xvalue.x;
-				otherEntities[xvalue.id].y = xvalue.y;
 				otherEntities[xvalue.id].roomId = xvalue.roomId;
 				otherEntities[xvalue.id].eeg = xvalue.eeg;
 				otherEntities[xvalue.id].userId = xvalue.userId;
 				otherEntities[xvalue.id].type = xvalue.type;
-
+				otherEntities[xvalue.id].targetX = xvalue.targetX;
+				otherEntities[xvalue.id].targetY = xvalue.targetY;
+				
 				//console.log(otherEntities);
 			}
 
@@ -344,6 +361,12 @@ function parseReply( text ) {
 
 			else if (xcommand == 'SYSMSG') {
 				// received msg text
+				showLog = true;
+				showLogTimer = 125;
+				logText.unshift({xvalue: xvalue});
+				if (logText.length > 10) {
+					logText.pop();
+				}
 				chatMessage = xvalue;
 				log(chatMessage);
 			}

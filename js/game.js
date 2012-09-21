@@ -2,15 +2,30 @@
 (function($p)
 {
 
-	$p.init = function(passedHolygrail, passedUsername) {
+	$p.init = function(passedHash) {
 
-		holygrail = passedHolygrail;
-		username = passedUsername;
+		hash = passedHash;
+		//console.log(hash);
+
+		$(window).keydown(function(event) {
+			// check for escape key
+			if (event.which == 27) {
+				// the following seems to fix the symptom but only in case the document has the focus
+				event.preventDefault();
+				$('.message').blur();
+				$('.message').toggle();
+			}
+		});
 
 		canvas.width = 800;
 		canvas.height = 640;
 		$('.mainContent').prepend(canvas);
 
+		canvasEffects.width = canvas.width ;
+		canvasEffects.height = canvas.height;
+
+		canvasLog.width = canvas.width ;
+		canvasLog.height = canvas.height;
 
 		// mouse coord fetcher
 		function getMousePos(canvas, evt) {
@@ -33,9 +48,6 @@
 				y: mouseY
 			};
 		}
-
-		canvasEffects.width = canvas.width ;
-		canvasEffects.height = canvas.height;
 
 		addEventListener("keydown", function (e) {
 				keysDown[e.keyCode] = true;
@@ -73,6 +85,8 @@
 				send( JSON.stringify(serverMessage) );
 
 				$(this).val('');
+				$(this).blur();
+
 			}
 		});
 
@@ -84,7 +98,7 @@
 
 			var serverMessage = {
 				xcommand: 'INITP',
-				xvalue: holygrail
+				xvalue: hash
 			};
 			send(JSON.stringify(serverMessage));
 
@@ -184,9 +198,10 @@
 					}
 				};
 				send( JSON.stringify(serverMessage) );
+				baseAttackDelay = 10 - hero.attackspeed;
+				//console.log(serverMessage);
 
-				baseAttackDelay = 20;
-
+				//baseAttackDelay = 20;
 				//console.log(bullets);
 			}
 

@@ -739,7 +739,14 @@ $(document).bind('keyup', '9', function(){
 });
 
 $(document).bind('keyup', '0', function(){
-	console.log('hide chat');
-	$('.message').toggle();
+
 	$('.log').toggle();
+
+});
+
+$(document).bind('keyup', 'return', function(){
+
+	$('.message').show();
+	$('.message').focus();
+
 });

@@ -59,6 +59,8 @@ class RoomController extends Controller
 	public function actionPlay()
 	{
 		$userObject = Yii::app()->getModule('user')->user();
+		$hash = $userObject->id . 'netrunners';
+		$hash = hash('sha256', $hash);
 
 		Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/jquery.hotkeys.js');
 		Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/fancywebsocket.js');
@@ -71,8 +73,10 @@ class RoomController extends Controller
 		Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/render.js');
 		Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/bindings.js');
 
+		Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/a_star.js');
+
 		Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/game.js');
-		Yii::app()->clientScript->registerScript('initGame', 'nrgame.init(' . $userObject->id . ', "' . CHtml::encode($userObject->username) . '");', CClientScript::POS_READY);
+		Yii::app()->clientScript->registerScript('initGame', 'nrgame.init("' . $hash . '");', CClientScript::POS_READY);
 
 		$room = Room::model()->findByPk($userObject->profile->location);
 

@@ -252,13 +252,41 @@ class WebSocket
 		$entities = Entity::model()->findAll();
 
 		foreach ($entities as $entity) {
-			$this->wsEntities[$entity->id] = array('entityId' => $entity->id, 'userId' => $entity->userId, 'roomId' => $entity->roomId, 'type' => $entity->type, 'attack' => $entity->attack, 'defend' => $entity->defend, 'stealth' => $entity->stealth, 'detect' => $entity->detect, 'eeg' => $entity->eeg, 'x' => $entity->x, 'y' => $entity->y, 'credits' => $entity->credits);
+			$this->wsEntities[$entity->id] = array(
+				'entityId' => $entity->id, 
+				'userId' => $entity->userId, 
+				'roomId' => $entity->roomId, 
+				'type' => $entity->type, 
+				'attack' => $entity->attack, 
+				'defend' => $entity->defend, 
+				'stealth' => $entity->stealth, 
+				'detect' => $entity->detect, 
+				'eeg' => $entity->eeg, 
+				'x' => $entity->x, 
+				'y' => $entity->y, 
+				'credits' => $entity->credits, 
+				'targetX' => $entity->x, 
+				'targetY' => $entity->y, 
+				'trajX' => 0, 
+				'trajY' => 0, 
+				'speed' => 32,
+				'moveTimer' => 0
+			);
 		}
 
 		$programs = Program::model()->findAll();
 
 		foreach ($programs as $program) {
-			$this->wsPrograms[$program->id] = array('programId' => $program->id, 'userId' => $program->userId, 'type' => $program->type, 'rating' => $program->rating, 'condition' => $program->condition, 'maxUpgrades' => $program->maxUpgrades, 'upgrades' => $program->upgrades, 'name' => CHtml::encode($program->name), 'loaded' => 0);
+			$this->wsPrograms[$program->id] = array(
+				'programId' => $program->id, 
+				'userId' => $program->userId, 
+				'type' => $program->type, 
+				'rating' => $program->rating, 
+				'condition' => $program->condition, 
+				'maxUpgrades' => $program->maxUpgrades, 
+				'upgrades' => $program->upgrades, 
+				'name' => CHtml::encode($program->name), 
+				'loaded' => 0);
 		}
 
 		$write = array();
@@ -266,7 +294,7 @@ class WebSocket
 
 		$nextPingCheck = time() + 1;
 		$nextSpawnCheck = time() + 300;
-		//$nextMobCheck = time() + 5;
+		$nextMobCheck = time() + 2;
 		while (isset($this->wsRead[0])) {
 			$changed = $this->wsRead;
 			$result = socket_select($changed, $write, $except, 1);
@@ -319,7 +347,6 @@ class WebSocket
 
 			if (time() >= $nextPingCheck) {
 				$this->wsCheckIdleClients();
-				$this->wsMobStuff();
 				$nextPingCheck = time() + 1;
 			}
 
@@ -328,10 +355,10 @@ class WebSocket
 				$nextSpawnCheck = time() + 300;
 			}
 
-			// if (time() >= $nextMobCheck) {
-			// 	$this->wsMobStuff();
-			// 	$nextMobCheck = time() + 1;
-			// }
+			if (time() >= $nextMobCheck) {
+				$this->wsMobStuff();
+				$nextMobCheck = time() + 2;
+			}
 
 		}
 
@@ -995,6 +1022,11 @@ class WebSocket
 		srand();
 		date_default_timezone_set('Europe/Berlin');
 
+		foreach ($this->wsEntities as $entityId => $entityObject) {
+			$this->wsEntities[$entityId]['targetX'] = rand(2, 25) * 32;
+			$this->wsEntities[$entityId]['targetY'] = rand(2, 20) * 32;
+		}
+
 		foreach ($this->wsClients as $id => $client) {
 			if (isset($this->wsUsers[$id])) {
 				foreach ($this->wsEntities as $entityId => $entityObject) {
@@ -1002,7 +1034,8 @@ class WebSocket
 						//$this->log('player in same room as entity!');
 
 						if ($this->wsEntities[$entityId]['type'] == 'bouncer') {
-							
+
+							// check if bouncer should attack
 							if ($this->wsEntities[$entityId]['userId'] != $this->wsUsers[$id]['userId']) {
 								$pStealth = $this->wsUsers[$id]['stealth'] + $this->wsUsers[$id]['stealthBonus'];
 								$eDetect = $this->wsEntities[$entityId]['userId'];
@@ -1010,42 +1043,30 @@ class WebSocket
 								$skillRoll = rand(2, 20) + $eDetect - $pStealth;
 
 								if ($skillRoll >= 11) {
+													
+									$currentBullets = count($this->wsBullets);
+						            //$Server->log($currentBullets);
+						            $this->wsBullets[$currentBullets] = array(
+						                'bulletId' => $currentBullets,
+						                'currentX' => (int)$this->wsEntities[$entityId]['x'],
+						                'currentY' => (int)$this->wsEntities[$entityId]['y'],
+						                'targetX' => (int)$this->wsUsers[$id]['x'],
+						                'targetY' => (int)$this->wsUsers[$id]['y'],
+						                'userId' => (int)$this->wsEntities[$entityId]['userId'],
+						                'trajX' => (int)$this->wsUsers[$id]['x'] - $this->wsEntities[$entityId]['x'],
+						                'trajY' => (int)$this->wsUsers[$id]['y'] - $this->wsEntities[$entityId]['y'],
+						                'roomId' => (int)$this->wsEntities[$entityId]['roomId'],
+						                'hadImpact' => 0
+						            );
 
-									// $newBullet = array(
-									// 	'currentY' => $this->wsEntities[$entityId]['y'],
-									// 	'currentX' => $this->wsEntities[$entityId]['x'],
-									// 	'targetX' => $this->wsUsers[$id]['x'],
-									// 	'targetY' => $this->wsUsers[$id]['y'],
-									// 	'trajX' => $this->wsUsers[$id]['x'] - $this->wsEntities[$entityId]['x'],
-									// 	'trajY' => $this->wsUsers[$id]['y'] - $this->wsEntities[$entityId]['y'],
-									// 	'userId' => $this->wsEntities[$entityId]['userId'],
-									// 	'roomId' => $this->wsEntities[$entityId]['roomId']
-									// );
+						            $returnCommand = array(
+						                'xcommand' => 'ADDBULLET',
+						                'xvalue' => $this->wsBullets[$currentBullets]
+						            );
 
-									
-			$currentBullets = count($this->wsBullets);
-            //$Server->log($currentBullets);
-            $this->wsBullets[$currentBullets] = array(
-                'bulletId' => $currentBullets,
-                'currentX' => (int)$this->wsEntities[$entityId]['x'],
-                'currentY' => (int)$this->wsEntities[$entityId]['y'],
-                'targetX' => (int)$this->wsUsers[$id]['x'],
-                'targetY' => (int)$this->wsUsers[$id]['y'],
-                'userId' => (int)$this->wsEntities[$entityId]['userId'],
-                'trajX' => (int)$this->wsUsers[$id]['x'] - $this->wsEntities[$entityId]['x'],
-                'trajY' => (int)$this->wsUsers[$id]['y'] - $this->wsEntities[$entityId]['y'],
-                'roomId' => (int)$this->wsEntities[$entityId]['roomId'],
-                'hadImpact' => 0
-            );
-
-            $returnCommand = array(
-                'xcommand' => 'ADDBULLET',
-                'xvalue' => $this->wsBullets[$currentBullets]
-            );
-
-            foreach ( $this->wsClients as $idc => $clientc ) {
-                $this->wsSend($idc, json_encode($returnCommand));
-            }
+						            foreach ( $this->wsClients as $idc => $clientc ) {
+						                $this->wsSend($idc, json_encode($returnCommand));
+						            }
 
 
 
@@ -1053,6 +1074,11 @@ class WebSocket
 								}
 							}
 
+						}
+
+
+						if ($this->wsEntities[$entityId]['type'] == 'default'){
+							
 						}
 
 					}
@@ -1130,8 +1156,8 @@ class WebSocket
 					}
 
 					$entity->created = date( 'Y-m-d H:i:s', time());
-					$entity->x = rand(2, 14) * 32;
-					$entity->y = rand(2, 14) * 32;
+					$entity->x = rand(2, 23) * 32;
+					$entity->y = rand(2, 18) * 32;
 
 					$entity->save();
 
@@ -1156,8 +1182,8 @@ class WebSocket
 					$entity->stealth = 0;
 					$entity->detect = 0;
 					$entity->eeg = 10;
-					$entity->x = rand(2, 14) * 32;
-					$entity->y = rand(2, 14) * 32;
+					$entity->x = rand(2, 23) * 32;
+					$entity->y = rand(2, 18) * 32;
 					$entity->credits = 1;
 
 					$entity->save();

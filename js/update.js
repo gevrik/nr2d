@@ -25,11 +25,20 @@ var update = function (modifier) {
 	}
 
 	if (baseAttackDelay > 0) {
-		console.log(baseAttackDelay);
 		baseAttackDelay -= 1;
 
 		if (baseAttackDelay < 0) {
 			baseAttackDelay = 0;
+		}
+
+	}
+
+	if (showLogTimer > 0) {
+		showLogTimer -= 1;
+
+		if (showLogTimer <= 0) {
+			showLog = false;
+			showLogTimer = 0;
 		}
 
 	}
@@ -61,7 +70,7 @@ var update = function (modifier) {
 		}
 	}
 
-	if (hero.y < 48 && northExit) {
+	if (hero.y < 48 && northExit && !combatMode) {
 		hero.y = canvas.height - 48;
 		serverMessage = {
 			xcommand: 'MOVETO',
@@ -74,7 +83,7 @@ var update = function (modifier) {
 		hero.y = 48;
 	}
 
-	if (hero.y > canvas.height - 48 && southExit) {
+	if (hero.y > canvas.height - 48 && southExit && !combatMode) {
 		hero.y = 48;
 		serverMessage = {
 			xcommand: 'MOVETO',
@@ -86,7 +95,7 @@ var update = function (modifier) {
 		hero.y = canvas.height - 48;
 	}
 
-	if (hero.x < 48 && westExit) {
+	if (hero.x < 48 && westExit && !combatMode) {
 		hero.x = canvas.width - 48;
 		serverMessage = {
 			xcommand: 'MOVETO',
@@ -98,7 +107,7 @@ var update = function (modifier) {
 		hero.x = 48;
 	}
 
-	if (hero.x > canvas.width - 48 && eastExit) {
+	if (hero.x > canvas.width - 48 && eastExit && !combatMode) {
 		hero.x = 48;
 		serverMessage = {
 			xcommand: 'MOVETO',
@@ -109,6 +118,31 @@ var update = function (modifier) {
 	else if (hero.x > canvas.width - 48) {
 		hero.x = canvas.width - 48;
 	}
+
+	jQuery.each(otherEntities, function(i, val) {
+
+		if (otherEntities[i] && otherEntities[i].roomId == roomId) {
+			var newTrajX = otherEntities[i].targetX - otherEntities[i].x;
+			var newTrajY = otherEntities[i].targetY - otherEntities[i].y;
+			var newX = otherEntities[i].x + (newTrajX * modifier);
+			var newY = otherEntities[i].y + (newTrajY * modifier);
+			otherEntities[i].x = newX;
+			otherEntities[i].y = newY;
+
+			var serverMessage = {
+				xcommand: 'UPDATEENTITY',
+				xvalue: {
+					entityId: i,
+					newX: newX,
+					newY: newY
+				}
+			};
+			send(JSON.stringify(serverMessage));
+
+		}
+
+
+	});
 
 	jQuery.each(bullets, function(i, val) {
 		if (bullets[i]) {
@@ -157,7 +191,7 @@ var update = function (modifier) {
 						if (bullets[i]) {
 							//console.log(otherEntities[ie]);
 							//delete bullets[i];
-							var serverMessage = {
+							serverMessage = {
 								xcommand: 'DELETEBULLET',
 								xvalue: i
 							};
@@ -213,7 +247,7 @@ var update = function (modifier) {
 					) {
 						if (bullets[i]) {
 							//delete bullets[i];
-							var serverMessage = {
+							serverMessage = {
 								xcommand: 'DELETEBULLET',
 								xvalue: i
 							};

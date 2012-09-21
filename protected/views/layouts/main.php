@@ -6,9 +6,8 @@
 	<meta name="language" content="en" />
 
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap.css" />
-	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/site.css" />
-
 	<?php Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/bootstrap.js'); ?>
+	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/site.css" />
   	<?php Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/site.js'); ?>
   	<?php Yii::app()->clientScript->registerScript('init', 'nr.init();', CClientScript::POS_READY); ?>
 

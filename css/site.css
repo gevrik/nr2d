@@ -18,6 +18,7 @@ body {
 	font-size: 10px;
 	margin-bottom: 0;
 	line-height: 10px;
+	display: none;
 }
 
 .message {
@@ -26,8 +27,13 @@ body {
 	background-color: #080808 !important;
 	border-color: #1e1e1e !important;
 	color: inherit !important;
+	display: none;
 }
 
 canvas {
 	margin-top: 8px;
+}
+
+input[type="text"] {
+	display: none;
 }
