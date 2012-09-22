@@ -1078,7 +1078,29 @@ class WebSocket
 
 
 						if ($this->wsEntities[$entityId]['type'] == 'default'){
-							
+							$currentBullets = count($this->wsBullets);
+				            //$Server->log($currentBullets);
+				            $this->wsBullets[$currentBullets] = array(
+				                'bulletId' => $currentBullets,
+				                'currentX' => (int)$this->wsEntities[$entityId]['x'],
+				                'currentY' => (int)$this->wsEntities[$entityId]['y'],
+				                'targetX' => (int)$this->wsUsers[$id]['x'],
+				                'targetY' => (int)$this->wsUsers[$id]['y'],
+				                'userId' => (int)$this->wsEntities[$entityId]['userId'],
+				                'trajX' => (int)$this->wsUsers[$id]['x'] - $this->wsEntities[$entityId]['x'],
+				                'trajY' => (int)$this->wsUsers[$id]['y'] - $this->wsEntities[$entityId]['y'],
+				                'roomId' => (int)$this->wsEntities[$entityId]['roomId'],
+				                'hadImpact' => 0
+				            );
+
+				            $returnCommand = array(
+				                'xcommand' => 'ADDBULLET',
+				                'xvalue' => $this->wsBullets[$currentBullets]
+				            );
+
+				            foreach ( $this->wsClients as $idc => $clientc ) {
+				                $this->wsSend($idc, json_encode($returnCommand));
+				            }							
 						}
 
 					}

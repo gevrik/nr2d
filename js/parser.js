@@ -129,8 +129,15 @@ function parseReply( text ) {
 			}
 
 			else if (xcommand == 'DELETEBULLET') {
-				//console.log('delete bullet');
-				delete bullets[xvalue];
+				if (bullets[xvalue]) {
+					var explosionX = bullets[xvalue].currentX;
+					var explosionY = bullets[xvalue].currentY;
+					ctx.beginPath();
+					ctx.arc(explosionX, explosionY, 16, 0, 2 * Math.PI, false);
+					ctx.fillStyle = "rgb(255, 0, 0)";
+					ctx.fill();
+					delete bullets[xvalue];
+				}
 			}
 
 			else if (xcommand == 'LOADPROGRAM') {
@@ -284,7 +291,7 @@ function parseReply( text ) {
 				bullets = [];
 				var serverCommand = {
 					xcommand: 'ROOMUPDATE',
-					value: 0
+					xvalue: 0
 				};
 				send(JSON.stringify(serverCommand));
 			}
@@ -303,6 +310,24 @@ function parseReply( text ) {
 				hero.eeg -= (eegReduction * 1);
 				if (hero.eeg < 0) {
 					hero.eeg = 0;
+				}
+			}
+
+			else if (xcommand == 'REDUCEENTEEG') {
+				var entEegReduction = xvalue.amount;
+				var entEegId = xvalue.entityId;
+				
+					//console.log('entity damaged');
+				if (otherEntities[entEegId]) {
+					otherEntities[entEegId].eeg -= (entEegReduction * 1);
+				
+					if (otherEntities[entEegId].eeg < 0) {
+						var serverCommandREE = {
+						xcommand: 'REMOVEENTITY',
+						xvalue: entEegId
+						};
+						send(JSON.stringify(serverCommandREE));
+					}
 				}
 			}
 
@@ -328,6 +353,11 @@ function parseReply( text ) {
 				if (storagePrograms[condRedProgId].condition < 0) {
 					storagePrograms[condRedProgId].condition = 0;
 				}
+			}
+
+			else if (xcommand == 'REMOVEENTITY') {
+				var removeEntId = xvalue;
+				delete otherEntities[removeEntId];
 			}
 
 			else if (xcommand == 'RESETPROGRESS') {
@@ -421,7 +451,7 @@ function parseReply( text ) {
 
 				var serverCommandFL = {
 					xcommand: 'ROOMUPDATE',
-					value: 0
+					xvalue: 0
 				};
 				send(JSON.stringify(serverCommandFL));
 			}

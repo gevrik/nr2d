@@ -204,6 +204,22 @@
 				//baseAttackDelay = 20;
 				//console.log(bullets);
 			}
+			else if (combatMode === false) {
+				if (targetX > canvas.width / 2 - 32 &&
+					targetX < canvas.width / 2 + 32 &&
+					targetY > canvas.height / 2 - 32 &&
+					targetY < canvas.height / 2 + 32) {
+
+					showLog = true;
+					showLogTimer = 125;
+					logText.unshift({xvalue: '> this is a ' + roomName + ' node'});
+					if (logText.length > 10) {
+						logText.pop();
+					}
+					log('> this is a ' + roomName + ' node');
+
+				}
+			}
 
 		}, false);
 

@@ -166,12 +166,21 @@ var update = function (modifier) {
 							) {
 								if (bullets[i]) {
 									//console.log(otherEntities[ie]);
-									//delete bullets[i];
+
+									bullets[i].currentX = -9999;
+									bullets[i].currentY = -9999;
+									
 									var serverMessage = {
 										xcommand: 'DELETEBULLET',
 										xvalue: i
 									};
 									send(JSON.stringify(serverMessage));
+									serverMessage = {
+										xcommand: 'DAMAGEENTITY',
+										xvalue: otherEntities[ie].id
+									};
+									send(JSON.stringify(serverMessage));
+									//console.log(serverMessage);
 								}
 							}
 						}
@@ -191,6 +200,8 @@ var update = function (modifier) {
 						if (bullets[i]) {
 							//console.log(otherEntities[ie]);
 							//delete bullets[i];
+							bullets[i].currentX = -9999;
+							bullets[i].currentY = -9999;
 							serverMessage = {
 								xcommand: 'DELETEBULLET',
 								xvalue: i
@@ -221,6 +232,10 @@ var update = function (modifier) {
 								if (bullets[i]) {
 									//console.log(otherEntities[ie]);
 									//delete bullets[i];
+
+									bullets[i].currentX = -9999;
+									bullets[i].currentY = -9999;
+
 									var serverMessage = {
 										xcommand: 'DELETEBULLET',
 										xvalue: i

@@ -140,6 +140,13 @@ var render = function () {
 				ctx.fillStyle = (otherEntities[i].userId == holygrail) ? "rgb(0, 255, 0)" : "rgb(255, 0, 0)";
 				ctx.fill();
 
+				ctx.fillStyle = "rgb(250, 250, 250)";
+				ctx.font = "8px monospace";
+				ctx.textAlign = "middle";
+				ctx.textBaseline = "top";
+				ctx.fillText(otherEntities[i].eeg, otherEntities[i].x, otherEntities[i].y - 32);
+
+
 				if (monsterReady) {
 					ctx.drawImage(monsterImage, otherEntities[i].x - 16, otherEntities[i].y - 16);
 				}
@@ -498,7 +505,7 @@ var showStorageMenuUI = function() {
 
 var showLogUI = function() {
 	var offset = 1;
-	console.log(logText);
+	//console.log(logText);
 	ctxLog.clearRect ( 0 , 0 , canvas.width , canvas.height );
 
 	ctxLog.strokeStyle = 'rgba(20,20,20,0.5)';

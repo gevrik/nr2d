@@ -25,7 +25,7 @@ class WSChatAction
         if ($xcommand == 'INITP') {
 
             $hash = $parsed->xvalue;
-            $Server->log($hash);
+            //$Server->log($hash);
 
             $users = User::model()->findAll();
             $foundUser = false;
@@ -202,7 +202,7 @@ class WSChatAction
                 //$Server->log('socket found');
                 if ($Server->wsUsers[$id]['roomId'] == $Server->wsBullets[$currentBullets]['roomId']) {
                     $Server->wsSend($id, json_encode($returnCommand));
-                    $Server->log('bullet sent');
+                    //$Server->log('bullet sent');
                 }
             }
         }
@@ -439,6 +439,31 @@ class WSChatAction
                     );
                     $Server->wsSend($clientID, json_encode($returnCommand));
 
+            }
+
+        }
+
+        else if ($xcommand == 'DAMAGEENTITY') {
+            $damagedEntityId = $parsed->xvalue;
+
+            if ($Server->wsEntities[$damagedEntityId]) {
+
+                $Server->wsEntities[$damagedEntityId]['eeg'] -= 1;
+
+                $returnCommand = array(
+                    'xcommand' => 'REDUCEENTEEG',
+                    'xvalue' => array(
+                        'entityId' => $damagedEntityId,
+                        'amount' => 1
+                    )
+                );
+
+                //var_dump($returnCommand);
+
+                foreach ($Server->wsClients as $id => $client) {
+                    if ($Server->wsClients[$id]['roomId'] == $Server->wsEntities[$damagedEntityId]['roomId'])
+                    $Server->wsSend($id, json_encode($returnCommand));
+                }
             }
 
         }
@@ -819,10 +844,30 @@ class WSChatAction
             $Server->wsSend($clientID, json_encode($returnCommand));
         }
 
+        else if ($xcommand == 'REMOVEENTITY') {
+            $entityId = $parsed->xvalue;
+
+            if ($Server->wsEntities[$entityId]) {
+
+                $Server->wsEntities[$entityId]['roomId'] = 0;
+
+                $returnCommand = array(
+                    'xcommand' => 'REMOVEENTITY',
+                    'xvalue' => $entityId
+                );
+
+                foreach ($Server->wsClients as $id => $client) {
+                    if ($Server->wsClients['roomId'] == $Server->wsEntities[$entityId]['roomId'])
+                    $Server->wsSend($id, json_encode($returnCommand));
+                }
+            }
+
+        }
+
         else if ($xcommand == 'ROOMUPDATE') {
 
             $room = Room::model()->findByPk($Server->wsUsers[$clientID]['roomId']);
-            $Server->log($room->name);
+            //$Server->log($room->name);
             $roomOwnerName = ($room->userId == 0) ? 'System' : CHtml::encode($room->user->username);
 
             $northExit = $room->getExit('north');
