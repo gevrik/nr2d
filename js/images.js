@@ -53,3 +53,10 @@ bulletImage.onload = function () {
 	bulletReady = true;
 };
 bulletImage.src = "../../images/bullet.png";
+
+var upgradeItemSound = new Audio("../../sounds/collectammo.ogg");
+var baseBlastSound = new Audio("../../sounds/baseblast.ogg");
+var virusBlastSound = new Audio("../../sounds/virusblast.ogg");
+var executingSound = new Audio("../../sounds/executing.ogg");
+var bgmSound = new Audio("../../sounds/bgm.ogg");
+var ioSound = new Audio("../../sounds/io.ogg");

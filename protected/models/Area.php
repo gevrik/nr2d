@@ -13,6 +13,13 @@
  */
 class Area extends CActiveRecord
 {
+
+	static $areaNameArray = array("EC","US","AC","LUNAR","ORBIT");
+
+	static $corpNameArray = array("Anbiotone","Apfase","Basequote","Baseron","Betataxon","Bigcity","Biocom","Blacktaxon","Canein","Cankix","Caredintex","Carenix","Citytech","Concare","Dalt-Zone","Daltfind","Dalttone","Damcan","Danovedax","Dentobam","Dentotax","Dentozap","Domdom","Doncity","Dongla","Donjoyfax","Dontechi","Dripfintam","Dripice","E-Tone","Fase-Is","Faseice","Faseis","Faxlam","Freshdom","Freshlux","Freshremis","Fun-Techno","Fundom","Ganjahow","Ganjala","Ganzfix","Ganztexon","Geocanhow","Gogodax","Gogolux","Gold-Zap","Golden-Green","Goldendax","Goldlax","Goodin","Goodron","Greentax","Hat-Dax","Haydax","Haytechno","Hothotfind","Howtam","Icephase","Incity","It-Cane","Itdax","Ittechno","Jaybetafan","Jayhow","Jayquote","Joygreen","Joylane","Joysailex","K-Is","K-Tone","K-Zoom","Kaydox","Keyfax","Konin","Konkcore","Konline","Kontech","Lablane","Lablex","Ladontam","Lexidom","Mat-Lam","Mathlamdox","Matlab","Matlane","Mattechi","Medhatdax","Movecane","Newcan","Nimfind","O-Ice","O-Quodom","O-Techno","Ono-Sendai","Opecan","Physdom","Quadtone","Quoteron","Rankcan","Rankfase","Ranking","Redfax","Redtechi","Roncane","Ronfase","Rounddexon","Roundin","Runtex","Sailgreen","Sanla","Sansailing","Scotoveex","Siliconfix","Siliconquote","Silverline","Silverzone","Singlehow","Singlela","singlela","Soloing","Solotam","Solotech","Sonbetala","Sonlax","Spantom","Stim-ex","Stimremfax","Stimtechnology","Strongdex","Sumdax","Sumtexon","Sunkayzoom","Tamlux","Tamplax","Tamplax","Techdex","Techdox","Technodom","Technohow","Tessier-Ashpool","Tin-Tam","Tinquadit","Trantechnology","Trantone","Trestex","Trippletaxon","Tripplezap","Tristechi","Tristex","Trusttexon","U-Base","Uni-Ice","villacon","Villatechnology","Villazone","Vivaline","Vollux","Volnix","X-Lam","Yearcane","Zaamcore","Zaamzunlex","Zam-Care","Zamfix","Zamlab","Zamlux","Zamron","Zath-Ice","Zathbase","Zathlam","Zenin","Zoom-Lex","Zummacare","Zumzunzone","Zuntom");
+
+	static $corpDeptArray = array("Biotech","Cybertech","Electronics","Research","Marketing","Development","Nanotech","Legal","Commercial","Public Relations","Internal Affairs","Security","Entertainment","Media","Services");
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -97,4 +104,7 @@ class Area extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
+
+
+
 }

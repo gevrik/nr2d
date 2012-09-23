@@ -6,6 +6,18 @@ var update = function (modifier) {
 	var serverMessage = {};
 
 	if (progressBar > 0) {
+		closeAllMenus();
+		if (progressBar == 2000) {
+			executingSound.playbackRate = 2.0;
+		}
+		else if (progressBar == 5000) {
+			executingSound.playbackRate = 1.0;
+		}
+		else if (progressBar == 10000) {
+			executingSound.playbackRate = 0.75;
+		}
+
+		executingSound.play();
 		progressBar -= modifier * 1000;
 
 		if (progressBar < 0) {
@@ -18,7 +30,7 @@ var update = function (modifier) {
 
 			send(JSON.stringify(serverMessage));
 			barCommand = '';
-			barParam = '';
+			barParam = {};
 			barOriginal = 0;
 		}
 
@@ -162,7 +174,8 @@ var update = function (modifier) {
 								otherEntities[ie].x <= (bullets[i].currentX + 16) &&
 								bullets[i].currentY <= (otherEntities[ie].y + 16) &&
 								otherEntities[ie].y <= (bullets[i].currentY + 16) &&
-								bullets[i].userId != otherEntities[ie].userId
+								bullets[i].userId != otherEntities[ie].userId &&
+								otherEntities[ie].roomId == bullets[i].roomId
 							) {
 								if (bullets[i]) {
 									//console.log(otherEntities[ie]);
@@ -180,7 +193,7 @@ var update = function (modifier) {
 										xvalue: otherEntities[ie].id
 									};
 									send(JSON.stringify(serverMessage));
-									//console.log(serverMessage);
+									console.log(serverMessage);
 								}
 							}
 						}

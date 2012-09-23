@@ -35,10 +35,21 @@ var render = function () {
 				roomTypeImage.src = "../../images/coding.png";
 			break;
 
+			case 'hacking':
+				roomTypeImage.src = "../../images/hacking.png";
+			break;
+
 			default:
 				roomTypeImage.src = "../../images/ph.png";
 			break;
 
+		}
+
+		if (music) {
+			bgmSound.play();
+		}
+		else {
+			bgmSound.pause();
 		}
 
 		bgImage.src = "../../images/bg" + roomLevel  + ".png";
@@ -131,8 +142,18 @@ var render = function () {
 				else if (otherEntities[i].type == 'codebit') {
 					monsterImage.src = "../../images/codebit.png";
 				}
+				else if (otherEntities[i].type == 'accesscode') {
+					monsterImage.src = "../../images/accesscode.png";
+				}
 				else {
 					monsterImage.src = "../../images/virus.png";
+				}
+
+				if (i == selectedEntity && selectedEntity != -1) {
+					ctx.beginPath();
+					ctx.arc(otherEntities[i].x, otherEntities[i].y, 18, 0, 2 * Math.PI, false);
+					ctx.fillStyle = "rgb(255, 255, 255)";
+					ctx.fill();
 				}
 
 				ctx.beginPath();
@@ -155,6 +176,12 @@ var render = function () {
 		});
 
 		if (heroReady) {
+			if (selectedEntity == -1) {
+				ctx.beginPath();
+				ctx.arc(hero.x, hero.y, 20, 0, 2 * Math.PI, false);
+				ctx.fillStyle = "rgb(255, 255, 255)";
+				ctx.fill();
+			}
 			if (combatMode === true) {
 				ctx.beginPath();
 				ctx.arc(hero.x, hero.y, 18, 0, 2 * Math.PI, false);
@@ -172,12 +199,12 @@ var render = function () {
 		ctx.strokeStyle = 'rgba(40,40,40,1)';
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		ctx.rect(4,2,110,20);
+		ctx.rect(4,14,110,20);
 		ctx.fill();
 		ctx.stroke();
 
 		ctx.beginPath();
-		ctx.rect(4,24,110,20);
+		ctx.rect(4,37,110,20);
 		ctx.fill();
 		ctx.stroke();
 
@@ -347,6 +374,10 @@ var showNodeMenuUI = function() {
 	if (roomType != 'coding') {
 		ctxEffects.fillText('5) Coding (250c)', 32, 176);
 	}
+
+	if (roomType != 'hacking') {
+		ctxEffects.fillText('6) Hacking (250c)', 32, 192);
+	}
 };
 
 var showCharMenuUI = function() {
@@ -381,13 +412,14 @@ var showProgramMenuUI = function() {
 	ctxEffects.fillText('snippets: ' + hero.snippets, 32, 80);
 	ctxEffects.fillText('coding: ' + hero.coding, 32, 96);
 
-	ctxEffects.fillText('t) stealth (100c)(10s)', 32, 128);
-	ctxEffects.fillText('k) attack (100c)(10s)', 32, 144);
+	ctxEffects.fillText('t) stealth booster (100c)(10s)', 32, 128);
+	ctxEffects.fillText('k) attack booster (100c)(10s)', 32, 144);
 	ctxEffects.fillText('n) antivirus (250)(25s)', 32, 160);
-	ctxEffects.fillText('p) detect (100c)(10s)', 32, 176);
-	ctxEffects.fillText('f) defend (100c)(10s)', 32, 192);
-	ctxEffects.fillText('b) eegbooster (100c)(10s)', 32, 208);
+	ctxEffects.fillText('p) detect booster (100c)(10s)', 32, 176);
+	ctxEffects.fillText('f) defend booster (100c)(10s)', 32, 192);
+	ctxEffects.fillText('b) eeg recover (100c)(10s)', 32, 208);
 	ctxEffects.fillText('1) scanner (100c)(10s)', 32, 224);
+	ctxEffects.fillText('2) dataminer (100c)(10s)', 32, 240);
 };
 
 var showMemoryMenuUI = function() {
@@ -408,14 +440,8 @@ var showMemoryMenuUI = function() {
 		}
 	});
 
-	//ctxEffects.fillText('stealth: ' + storagePrograms[hero.stealthProgram].name, 32, 64);
-	
-	if (usedSlots < hero.slots) {
-		ctxEffects.fillText('r) load program into active memory', 32, 80);
-	}
-
 	if (getMemoryUsed() > 0) {
-		ctxEffects.fillText('u) unload all programs', 32, 96);
+		ctxEffects.fillText('u) unload all programs', 32, 80);
 	}
 };
 
@@ -425,6 +451,7 @@ var showInventoryMenuUI = function() {
 	ctxEffects.fillText('=====================', 32, 48);
 
 	var foundInvProgCounter = 0;
+	var shownPrevPage = 0;
 
 	jQuery.each(pageArray, function(i, val) {
 		if (pageArray[i].page == currentPage) {
@@ -437,7 +464,8 @@ var showInventoryMenuUI = function() {
 			if (foundInvProgCounter == 9 && currentPage < maxPage) {
 				ctxEffects.fillText('n) next page', 32, 96 + (pageArray[i].hotkey * 16));
 			}
-			if (currentPage > 1) {
+			if (currentPage > 1 && shownPrevPage === 0) {
+				shownPrevPage = 1;
 				ctxEffects.fillText('p) previous page', 32, 112 + (pageArray[i].hotkey * 16));
 			}
 		}
@@ -457,8 +485,14 @@ var showItemMenuUI = function() {
 	ctxEffects.fillText('max upgrades: ' + programObject.maxUpgrades, 32, 128);
 	ctxEffects.fillText('upgrades: ' + programObject.upgrades, 32, 144);
 
-	if (programObject.rating < 8 && programObject.loaded === 0) {
-		ctxEffects.fillText('g) upgrade', 32, 176);
+	if (programObject.rating < 8 &&
+		programObject.loaded === 0 &&
+		programObject.upgrades < programObject.maxUpgrades &&
+		hero.credits >= (programObject.rating * programObject.rating) * 1000 &&
+		hero.snippets >= (programObject.rating * programObject.rating) * 10) {
+		var upgradeCredCost = (programObject.rating * programObject.rating) * 1000;
+		var upgradeSnipCost = (programObject.rating * programObject.rating) * 10;
+		ctxEffects.fillText('g) upgrade (' + upgradeCredCost + 'c) (' + upgradeSnipCost + 's)', 32, 176);
 	}
 
 	if (programObject.loaded == 1) {
@@ -469,12 +503,6 @@ var showItemMenuUI = function() {
 		}
 	}
 
-	if (programObject.loaded == 1) {
-		if (programObject.type == 'eegbooster' || programObject.type == 'scanner') {
-			canExecute = true;
-			ctxEffects.fillText('1) execute', 32, 208);
-		}
-	}
 };
 
 var showStorageMenuUI = function() {
@@ -484,6 +512,7 @@ var showStorageMenuUI = function() {
 	//console.log(pageArray);
 
 	var foundProgramsCounter = 0;
+	var shownPrevPage = 0;
 
 	jQuery.each(pageArray, function(i, val) {
 		if (pageArray[i].page == currentPage) {
@@ -496,7 +525,8 @@ var showStorageMenuUI = function() {
 			if (foundProgramsCounter == 9 && currentPage < maxPage) {
 				ctxEffects.fillText('n) next page', 32, 96 + (pageArray[i].hotkey * 16));
 			}
-			if (currentPage > 1) {
+			if (currentPage > 1 && shownPrevPage === 0) {
+				shownPrevPage = 1;
 				ctxEffects.fillText('p) previous page', 32, 112 + (pageArray[i].hotkey * 16));
 			}
 		}

@@ -11,7 +11,7 @@ class WSServerCommand extends CConsoleCommand
         $Server->bind('message', array('WSChatAction', 'wsOnMessage'));
         $Server->bind('open', array('WSChatAction', 'wsOnOpen'));
         $Server->bind('close', array('WSChatAction', 'wsOnClose'));
-        $Server->wsStartServer('127.0.0.1', 9300);
+        $Server->wsStartServer('totalmadownage.de', 9300);
 
     }
 }

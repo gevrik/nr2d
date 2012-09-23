@@ -74,6 +74,7 @@ function getVirusDamage()
 
 function renderMenuBG()
 {
+	selectedEntity = 0;
 	ctxEffects.clearRect ( 0 , 0 , canvas.width , canvas.height );
 	ctxEffects.strokeStyle = 'rgba(80,80,80,0.9)';
 	ctxEffects.fillStyle = 'rgba(0,0,0,0.9)';

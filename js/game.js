@@ -59,6 +59,7 @@
 
 		// The main game loop
 		var main = function () {
+
 			var now = Date.now();
 			var delta = now - then;
 
@@ -66,12 +67,13 @@
 			render();
 
 			then = now;
+
 		};
 
 		// websocket
 		log('> connecting...');
-		Server = new FancyWebSocket('ws://127.0.0.1:9300');
-		//Server = new FancyWebSocket('ws://totalmadownage.de:9300');
+		//Server = new FancyWebSocket('ws://127.0.0.1:9300');
+		Server = new FancyWebSocket('ws://totalmadownage.de:9300');
 
 		$('#message').keypress(function(e) {
 			if ( e.keyCode == 13 && this.value ) {
@@ -104,18 +106,12 @@
 
 			setInterval(main, 40);
 
-			serverMessage = {
-				xcommand: 'ROOMUPDATE',
-				xvalue: 0
-			};
-
-			send(JSON.stringify(serverMessage));
 		});
 
 		//OH NOES! Disconnection occurred.
 		Server.bind('close', function( data ) {
 			log( "Disconnected." );
-			//alert('You have been disconnected!');
+			alert('You have been disconnected!');
 		});
 
 		//Log any messages sent from server
@@ -199,6 +195,7 @@
 				};
 				send( JSON.stringify(serverMessage) );
 				baseAttackDelay = 10 - hero.attackspeed;
+				baseBlastSound.play();
 				//console.log(serverMessage);
 
 				//baseAttackDelay = 20;
@@ -212,13 +209,46 @@
 
 					showLog = true;
 					showLogTimer = 125;
-					logText.unshift({xvalue: '> this is a ' + roomName + ' node'});
+					logText.unshift({xvalue: '> target: ' + roomName + ' node'});
 					if (logText.length > 10) {
 						logText.pop();
 					}
-					log('> this is a ' + roomName + ' node');
-
+					log('> target: ' + roomName + ' node');
 				}
+
+				selectedEntity = 0;
+
+				jQuery.each(otherEntities, function(i, val) {
+					if (otherEntities[i]) {
+						if (
+							targetX <= (otherEntities[i].x + 32) &&
+							otherEntities[i].x <= (targetX + 32) &&
+							targetY <= (otherEntities[i].y + 32) &&
+							otherEntities[i].y <= (targetY + 32) &&
+							otherEntities[i].roomId == roomId
+						) {
+							//console.log('entity clicked');
+							selectedEntity = i;
+							showLog = true;
+							showLogTimer = 125;
+							logText.unshift({xvalue: '> target: ' + (otherEntities[i].type) + ' entity'});
+							if (logText.length > 10) {
+								logText.pop();
+							}
+							log('> target: ' + otherEntities[i].type + ' entity');
+						}
+					}
+				});
+
+				if (
+					targetX <= (hero.x + 32) &&
+					hero.x <= (targetX + 32) &&
+					targetY <= (hero.y + 32) &&
+					hero.y <= (targetY + 32)
+				) {
+					selectedEntity = -1;
+				}
+
 			}
 
 		}, false);

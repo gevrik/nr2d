@@ -42,6 +42,13 @@ class WSChatAction
                 return;
             }
 
+            foreach ($Server->wsClients as $checkClientId => $checkClient) {
+                if ($Server->wsUsers[$checkClientId]['userId'] == $userObject->id) {
+                    $Server->wsClose($clientID);
+                    return;
+                }
+            }
+
             //$userObject = User::model()->findByPk($parsed->xvalue);
 
             $profileObject = $userObject->profile;
@@ -93,7 +100,7 @@ class WSChatAction
                     'decking' => (int)$profileObject->decking,
                     'slots' => (int)$profileObject->slots,
                     'name' => $userObject->username,
-                    'attackspeed' => $userObject->profile->attackspeed
+                    'attackspeed' => (int)$userObject->profile->attackspeed
                 ),
             );
             $Server->wsSend($clientID, json_encode($returnCommand));
@@ -248,7 +255,7 @@ class WSChatAction
         }
 
         if ($xcommand == 'CREATENODE') {
-            $direction = $parsed->xvalue;
+            $direction = $parsed->xvalue->direction;
             $room = Room::model()->findByPk($Server->wsUsers[$clientID]['roomId']);
             $userObject = User::model()->findByPk($Server->wsUsers[$clientID]['userId']);
 
@@ -317,7 +324,7 @@ class WSChatAction
         }
 
         else if ($xcommand == 'CREATEPROGRAM') {
-            $programType = $parsed->xvalue;
+            $programType = $parsed->xvalue->type;
             $room = Room::model()->findByPk($Server->wsUsers[$clientID]['roomId']);
             $userObject = User::model()->findByPk($Server->wsUsers[$clientID]['userId']);
 
@@ -329,6 +336,7 @@ class WSChatAction
                 case 'attack':
                 case 'eegbooster':
                 case 'scanner':
+                case 'dataminer':
                     $creditCost = 100;
                     $snippetCost = 10;
                 break;
@@ -403,13 +411,18 @@ class WSChatAction
 
                     if ($programType == 'eegbooster') {
                         $newModel->condition = 10;
-                        $newModel->name = 'eeg booster';
+                        $newModel->name = 'eeg booster v1.0';
                         $newModel->description = 'This program boosts your EEG value.';
                     }
 
                     if ($programType == 'scanner') {
                         $newModel->name = 'scanner v1.0';
                         $newModel->description = 'This program allows you to scan the node.';
+                    }
+
+                    if ($programType == 'dataminer') {
+                        $newModel->name = 'dataminer v1.0';
+                        $newModel->description = 'This program can be used on entities to gain their data.';
                     }
 
                     $newModel->save();
@@ -446,6 +459,8 @@ class WSChatAction
         else if ($xcommand == 'DAMAGEENTITY') {
             $damagedEntityId = $parsed->xvalue;
 
+
+
             if ($Server->wsEntities[$damagedEntityId]) {
 
                 $Server->wsEntities[$damagedEntityId]['eeg'] -= 1;
@@ -458,11 +473,10 @@ class WSChatAction
                     )
                 );
 
-                //var_dump($returnCommand);
-
                 foreach ($Server->wsClients as $id => $client) {
-                    if ($Server->wsClients[$id]['roomId'] == $Server->wsEntities[$damagedEntityId]['roomId'])
-                    $Server->wsSend($id, json_encode($returnCommand));
+                    if ($Server->wsUsers[$id]['roomId'] == $Server->wsEntities[$damagedEntityId]['roomId']) {
+                        $Server->wsSend($id, json_encode($returnCommand));
+                    }
                 }
             }
 
@@ -475,12 +489,18 @@ class WSChatAction
                 'xcommand' => 'REDUCEEEG',
                 'xvalue' => 1
             );
+            $Server->wsUsers[$damagedUserSocketId]['eeg'] -= 1;
+            $userObject = User::model()->findByPk($Server->wsUsers[$damagedUserSocketId]['userId']);
+            $userObject->profile->eeg -= 1;
+            $userObject->profile->save(false);
+
             $Server->wsSend($damagedUserSocketId, json_encode($returnCommand));
 
         }
 
         else if ($xcommand == 'EXECUTEPROGRAM') {
-            $executeProgId = $parsed->xvalue;
+            $executeProgId = $parsed->xvalue->programId;
+            $entityId = $parsed->xvalue->entityId;
 
             if ($Server->wsPrograms[$executeProgId]) {
 
@@ -535,6 +555,40 @@ class WSChatAction
                                 $userObject->profile->eeg = 100;
                             }
                             $userObject->profile->save(false);
+
+                        }
+
+                        if ($Server->wsPrograms[$executeProgId]['type'] == 'dataminer' && $entityFound != -1) {
+
+                            $Server->log('datamining');
+                            $entityFound = $entityId;
+
+                            if ($entityFound != 0) {
+
+                                if ($Server->wsEntities[$entityFound]) {
+
+                                    $targetEntity = $Server->wsEntities[$entityFound];
+                                    $userObject = User::model()->findByPk($Server->wsUsers[$clientID]['userId']);
+
+                                    if ($targetEntity['type'] == 'fragment') {
+                                        $Server->wsUsers[$clientID]['credits'] += $targetEntity['eeg'];
+                                        $userObject->profile->credits += $targetEntity['eeg'];
+                                    }
+
+                                    if ($targetEntity['type'] == 'codebit') {
+                                        $Server->wsUsers[$clientID]['snippets'] += $targetEntity['eeg'];
+                                        $userObject->profile->snippets += $targetEntity['eeg'];
+                                    }
+
+                                    $userObject->profile->save(false);
+
+                                    $returnCommand = array(
+                                    'xcommand' => 'MINEENTITY',
+                                    'xvalue' => $entityFound
+                                );
+                                $Server->wsSend($clientID, json_encode($returnCommand));
+                                }
+                            }
 
                         }
 
@@ -636,7 +690,7 @@ class WSChatAction
         } 
 
         else if ($xcommand == 'LOADPROGRAM') {
-            $loadProgId = $parsed->xvalue;
+            $loadProgId = $parsed->xvalue->id;
 
             $returnCommand = array(
                 'xcommand' => 'LOADPROGRAM',
@@ -705,7 +759,7 @@ class WSChatAction
 
         else if ($xcommand == 'MODIFYNODE') {
 
-            $newType = $parsed->xvalue;
+            $newType = $parsed->xvalue->type;
             $room = Room::model()->findByPk($Server->wsUsers[$clientID]['roomId']);
             $userObject = User::model()->findByPk($Server->wsUsers[$clientID]['userId']);
 
@@ -723,6 +777,7 @@ class WSChatAction
                 case 'terminal':
                 case 'coproc':
                 case 'coding':
+                case 'hacking':
                     $cost = 250;
                 break;
 
@@ -846,10 +901,17 @@ class WSChatAction
 
         else if ($xcommand == 'REMOVEENTITY') {
             $entityId = $parsed->xvalue;
+            $Server->log($entityId);
 
             if ($Server->wsEntities[$entityId]) {
 
+                $entityObject = Entity::model()->findByPk($entityId);
+                $entityObject->roomId = 0;
+
+                $entityObject->save(false);
+
                 $Server->wsEntities[$entityId]['roomId'] = 0;
+                $Server->wsRooms[$Server->wsEntities[$entityId]['roomId']]['entityAmount'] -= 1;
 
                 $returnCommand = array(
                     'xcommand' => 'REMOVEENTITY',
@@ -857,7 +919,7 @@ class WSChatAction
                 );
 
                 foreach ($Server->wsClients as $id => $client) {
-                    if ($Server->wsClients['roomId'] == $Server->wsEntities[$entityId]['roomId'])
+                    if ($Server->wsClients[$id]['roomId'] == $Server->wsEntities[$entityId]['roomId'])
                     $Server->wsSend($id, json_encode($returnCommand));
                 }
             }
@@ -962,7 +1024,7 @@ class WSChatAction
 
         else if ($xcommand == 'UNLOADPROGRAM') {
 
-            $programId = $parsed->xvalue;
+            $programId = $parsed->xvalue->id;
 
             if ($Server->wsPrograms[$programId]['userId'] == $Server->wsUsers[$clientID]['userId'] && $Server->wsPrograms[$programId]['loaded'] == 1) {
 
@@ -1180,6 +1242,68 @@ class WSChatAction
 
         }
 
+        else if ($xcommand = 'UPGRADEPROGRAM') {
+            $program = Program::model()->findByPk($parsed->xvalue->id);
+            $upgrader = $Server->wsUsers[$clientID];
+            
+            $creditsCost = ($program->rating * $program->rating) * 1000;
+            $snippetsCost = ($program->rating * $program->rating) * 10;
+
+            if ($program->maxUpgrades > $program->upgrades &&
+                $creditsCost <= $upgrader['credits'] &&
+                $snippetsCost <= $upgrader['snippets'] &&
+                $program->rating < 8
+            ) {
+                $userObject = User::model()->findByPk($Server->wsUsers[$clientID]['userId']);
+                $userObject->profile->credits -= $creditsCost;
+                $userObject->profile->snippets -= $snippetsCost;
+                $userObject->profile->save(false);
+                $returnCommand = array(
+                    'xcommand' => 'CREDITSCHANGE',
+                    'xvalue' => $creditsCost
+                );
+                $Server->wsSend($clientID, json_encode($returnCommand));
+                $Server->wsUsers[$clientID]['credits'] -= $creditsCost;
+                $returnCommand = array(
+                    'xcommand' => 'SNIPPETSCHANGE',
+                    'xvalue' => $snippetsCost
+                );
+                $Server->wsSend($clientID, json_encode($returnCommand));
+                $Server->wsUsers[$clientID]['snippets'] -= $snippetsCost;
+
+                $program->rating += 1;
+                $program->upgrades += 1;
+                $newProgName = substr_replace($program->name ,"",-3);
+                $program->name = $newProgName . $program->rating . '.0';
+                
+                $program->save(false);
+
+                $Server->wsPrograms[$program->id]['rating'] += 1;
+                $Server->wsPrograms[$program->id]['upgrades'] += 1;
+                $Server->wsPrograms[$program->id]['name'] = $newProgName . $program->rating . '.0';
+
+                $returnCommand = array(
+                    'xcommand' => 'UPGRADEITEM',
+                    'xvalue' => array(
+                        'itemId' => $program->id,
+                        'newName' => $newProgName . $program->rating . '.0',
+                    )
+                );
+                $Server->wsSend($clientID, json_encode($returnCommand));
+
+                $returnCommand = array(
+                    'xcommand' => 'SYSMSG',
+                    'xvalue' => '> program upgraded'
+                );
+                $Server->wsSend($clientID, json_encode($returnCommand));
+
+
+            }
+
+            //var_dump($program->name);
+
+        }
+
 
         // if ($command == 'ATTACKVIRUS') {
         //     $targetVirusId = array_shift($message);
@@ -1259,8 +1383,10 @@ class WSChatAction
                 'xcommand' => 'REMOVEUSER',
                 'xvalue' => $clientID
             );
-            //$Server->wsSend($id, "REMOVEUSER " . $clientID);
+            $Server->wsSend($id, json_encode($returnCommand));
         }
+
+        unset($Server->wsUsers[$clientID]);
 
         $Server->log( "$ip ($clientID) has disconnected." );
 

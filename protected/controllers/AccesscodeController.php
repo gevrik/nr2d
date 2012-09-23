@@ -1,6 +1,6 @@
 <?php
 
-class AreaController extends Controller
+class AccesscodeController extends Controller
 {
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
@@ -36,7 +36,7 @@ class AreaController extends Controller
                     'users'=>array('@'),
             ),
             array('allow', // allow admin user to perform 'admin' and 'delete' actions
-                    'actions'=>array('admin','delete','create','update','index','view', 'createRandom'),
+                    'actions'=>array('admin','delete','create','update','index','view'),
                     'users'=>Yii::app()->getModule('user')->getAdmins(),
             ),
             array('deny',  // deny all users
@@ -56,134 +56,20 @@ class AreaController extends Controller
 		));
 	}
 
-	public function actionCreateRandom()
-	{
-		$area = new Area;
-		$area->userId = 0;
-		$area->created = date( 'Y-m-d H:i:s', time());
-		$area->accessCode = 'aaa';
-		$area->level = 1;
-
-		srand();
-
-		$totalCorpNames = count(Area::$corpNameArray);
-		$randomCorpName = rand(0, $totalCorpNames - 1);
-		$corpName = Area::$corpNameArray[$randomCorpName];
-
-		$totalCorpNames = count(Area::$areaNameArray);
-		$randomCorpName = rand(0, $totalCorpNames - 1);
-		$corpArea = Area::$areaNameArray[$randomCorpName];
-
-		$totalCorpNames = count(Area::$corpDeptArray);
-		$randomCorpName = rand(0, $totalCorpNames - 1);
-		$corpDept = Area::$corpDeptArray[$randomCorpName];
-
-		$area->name = $corpName . ' ' . $corpDept . ' (' . $corpArea . ')';
-
-		$area->save();
-
-		$room = new Room;
-		$room->areaId = $area->id;
-		$room->userId = 0;
-		$room->created = date( 'Y-m-d H:i:s', time());
-		$room->level = $area->level;
-		$room->x = 0;
-		$room->y = 0;
-		$room->type = 'io';
-		$room->name = $area->name . ' (Lobby)';
-		$room->description = 'The lobby of this corporate system.';
-
-		$currentX = 0;
-		$currentY = 0;
-		$currentLevel = 1;
-
-		$room->save();
-
-		for ($x = 1; $x <= $area->level * 8; $x++) {
-
-			srand();
-			$randDir = rand(1, 100);
-			if ($randDir > 50) {
-				$currentX += 1;
-			}
-			else {
-				$currentY += 1;
-			}
-
-			$randLevel = rand(1, 100);
-			if ($randLevel > 75) {
-				$currentLevel += 1;
-			}
-
-			if ($x == 1) {
-				$roomType = 'firewall';
-				$roomName = $area->name . ' (FW)';
-				$roomDesc = 'A firewall node.';
-			}
-			else {
-				$randType = rand(1, 6);
-				if ($randType == 1) {
-					$roomType = 'firewall';
-					$roomName = $area->name . ' (FW)';
-					$roomDesc = 'A firewall node.';
-				}
-				else if ($randType == 2) {
-					$roomType = 'database';
-					$roomName = $area->name . ' (DB)';
-					$roomDesc = 'A database node.';
-				}
-				else if ($randType == 3) {
-					$roomType = 'terminal';
-					$roomName = $area->name . ' (TR)';
-					$roomDesc = 'A terminal node.';
-				}
-				else if ($randType == 4) {
-					$roomType = 'coproc';
-					$roomName = $area->name . ' (CP)';
-					$roomDesc = 'A coproc node.';
-				}
-				else if ($randType == 5) {
-					$roomType = 'coding';
-					$roomName = $area->name . ' (CD)';
-					$roomDesc = 'A coding node.';
-				}
-				else if ($randType == 6) {
-					$roomType = 'hacking';
-					$roomName = $area->name . ' (HX)';
-					$roomDesc = 'A hacking node.';
-				}
-			}
-
-			$room = new Room;
-			$room->areaId = $area->id;
-			$room->userId = 0;
-			$room->created = date( 'Y-m-d H:i:s', time());
-			$room->level = $currentLevel;
-			$room->x = $currentX;
-			$room->y = $currentY;
-			$room->name = $roomName;
-			$room->type = $roomType;
-			$room->description = $roomDesc;
-			$room->save();
-
-		}
-
-	}
-
 	/**
 	 * Creates a new model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
 	 */
 	public function actionCreate()
 	{
-		$model=new Area;
+		$model=new Accesscode;
 
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
-		if(isset($_POST['Area']))
+		if(isset($_POST['Accesscode']))
 		{
-			$model->attributes=$_POST['Area'];
+			$model->attributes=$_POST['Accesscode'];
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->id));
 		}
@@ -205,9 +91,9 @@ class AreaController extends Controller
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
-		if(isset($_POST['Area']))
+		if(isset($_POST['Accesscode']))
 		{
-			$model->attributes=$_POST['Area'];
+			$model->attributes=$_POST['Accesscode'];
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->id));
 		}
@@ -236,7 +122,7 @@ class AreaController extends Controller
 	 */
 	public function actionIndex()
 	{
-		$dataProvider=new CActiveDataProvider('Area');
+		$dataProvider=new CActiveDataProvider('Accesscode');
 		$this->render('index',array(
 			'dataProvider'=>$dataProvider,
 		));
@@ -247,10 +133,10 @@ class AreaController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		$model=new Area('search');
+		$model=new Accesscode('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_GET['Area']))
-			$model->attributes=$_GET['Area'];
+		if(isset($_GET['Accesscode']))
+			$model->attributes=$_GET['Accesscode'];
 
 		$this->render('admin',array(
 			'model'=>$model,
@@ -264,7 +150,7 @@ class AreaController extends Controller
 	 */
 	public function loadModel($id)
 	{
-		$model=Area::model()->findByPk($id);
+		$model=Accesscode::model()->findByPk($id);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;
@@ -276,7 +162,7 @@ class AreaController extends Controller
 	 */
 	protected function performAjaxValidation($model)
 	{
-		if(isset($_POST['ajax']) && $_POST['ajax']==='area-form')
+		if(isset($_POST['ajax']) && $_POST['ajax']==='accesscode-form')
 		{
 			echo CActiveForm::validate($model);
 			Yii::app()->end();

@@ -21,8 +21,8 @@ return array(
 	'components'=>array(
 		
 		'db'=>array(
-			//'connectionString' => 'mysql:host=localhost;dbname=nr2d',
-			'connectionString' => 'mysql:host=localhost:8889;dbname=nr2d',
+			'connectionString' => 'mysql:host=localhost;dbname=nr2d',
+			//'connectionString' => 'mysql:host=localhost:8889;dbname=nr2d',
 			'emulatePrepare' => true,
 			'username' => 'nr2d',
 			'password' => 'ARtUVQBy7QKWCvHX',

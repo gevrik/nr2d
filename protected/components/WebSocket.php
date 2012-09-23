@@ -228,11 +228,33 @@ class WebSocket
 			}
 
 			if ($entityAmount < $room->level && $room->type == 'coding') {
+				$this->log('codebit spawned');
 				$this->wsRooms[$room->id]['entityAmount'] += 1;
 				$entity = new Entity;
 				$entity->userId = $room->userId;
 				$entity->roomId = $room->id;
 				$entity->type = 'codebit';
+				$entity->created = date( 'Y-m-d H:i:s', time());
+				$entity->attack = 0;
+				$entity->defend = 0;
+				$entity->stealth = 1;
+				$entity->detect = 0;
+				$entity->eeg = 10;
+				$entity->x = rand(2, 14) * 32;
+				$entity->y = rand(2, 14) * 32;
+				$entity->credits = 0;
+
+				$entity->save();
+
+			}
+
+			if ($entityAmount < $room->level && $room->type == 'hacking') {
+				$this->log('accesscode spawned');
+				$this->wsRooms[$room->id]['entityAmount'] += 1;
+				$entity = new Entity;
+				$entity->userId = $room->userId;
+				$entity->roomId = $room->id;
+				$entity->type = 'accesscode';
 				$entity->created = date( 'Y-m-d H:i:s', time());
 				$entity->attack = 0;
 				$entity->defend = 0;
@@ -294,6 +316,7 @@ class WebSocket
 
 		$nextPingCheck = time() + 1;
 		$nextSpawnCheck = time() + 300;
+		$nextEcoCheck = time() + 900;
 		$nextMobCheck = time() + 2;
 		while (isset($this->wsRead[0])) {
 			$changed = $this->wsRead;
@@ -358,6 +381,11 @@ class WebSocket
 			if (time() >= $nextMobCheck) {
 				$this->wsMobStuff();
 				$nextMobCheck = time() + 2;
+			}
+
+			if (time() >= $nextEcoCheck) {
+				$this->wsEcoStuff();
+				$nextEcoCheck = time() + 900;
 			}
 
 		}
@@ -1077,7 +1105,7 @@ class WebSocket
 						}
 
 
-						if ($this->wsEntities[$entityId]['type'] == 'default'){
+						if ($this->wsEntities[$entityId]['type'] == 'murphy virus'){
 							$currentBullets = count($this->wsBullets);
 				            //$Server->log($currentBullets);
 				            $this->wsBullets[$currentBullets] = array(
@@ -1094,7 +1122,7 @@ class WebSocket
 				            );
 
 				            $returnCommand = array(
-				                'xcommand' => 'ADDBULLET',
+				                'xcommand' => 'ADDBULLETE',
 				                'xvalue' => $this->wsBullets[$currentBullets]
 				            );
 
@@ -1107,6 +1135,46 @@ class WebSocket
 				}
 			}
 		}
+	}
+
+	function wsEcoStuff()
+	{
+		date_default_timezone_set('Europe/Berlin');
+	    $this->log('ecocheck!');
+	    $userArray = array();
+
+	    foreach ($this->wsEntities as $entityId => $entityObject) {
+	    	if ($this->wsEntities[$entityId] &&
+	    		$this->wsEntities[$entityId]['userId'] != 0 &&
+	    		$this->wsEntities[$entityId]['type'] == 'user') {
+	    		$userArray[$this->wsEntities[$entityId]['userId']]['total'] += $this->wsEntities[$entityId]['eeg'];
+	    	}
+	    }
+
+	    foreach ($userArray as $userEcoId => $userEcoObject) {
+	    	$this->log($userEcoId . ': ' . $userEcoObject['total']);
+	    	$userObject = User::model()->findByPk($userEcoId);
+	    	//var_dump($userObject);
+	    	$userObject->profile->credits += $userEcoObject['total'];
+	    	$userObject->profile->save(false);
+
+	    	foreach ($this->wsClients as $clientId => $clientObject) {
+	    		if ($this->wsClients[$clientId]) {
+	    			if ($this->wsUsers[$clientId] &&
+	    				$this->wsUsers[$clientId]['userId'] == $userEcoId) {
+	    				$this->wsUsers[$clientId]['credits'] += $userEcoObject['total'];
+	    				$returnCommand = array(
+				                'xcommand' => 'RAISECREDITS',
+				                'xvalue' => $userEcoObject['total']
+				            );
+
+	    				$this->wsSend($clientId, json_encode($returnCommand));
+	    			}
+	    		}
+	    	}
+
+	    }
+
 	}
 
 	function wsCronStuff()
@@ -1177,6 +1245,16 @@ class WebSocket
 						$entity->credits = 0;
 					}
 
+					if ($this->wsRooms[$roomId]['type'] == 'hacking') {
+						$entity->type = 'accesscode';
+						$entity->attack = 0;
+						$entity->defend = 0;
+						$entity->stealth = 1;
+						$entity->detect = 0;
+						$entity->eeg = 10;
+						$entity->credits = 0;
+					}
+
 					$entity->created = date( 'Y-m-d H:i:s', time());
 					$entity->x = rand(2, 23) * 32;
 					$entity->y = rand(2, 18) * 32;
@@ -1197,7 +1275,7 @@ class WebSocket
 					$entity = new Entity;
 					$entity->userId =0;
 					$entity->roomId = $roomId;
-					$entity->type = 'default';
+					$entity->type = 'murphy virus';
 					$entity->created = date( 'Y-m-d H:i:s', time());
 					$entity->attack = 1;
 					$entity->defend = 0;

@@ -37,3 +37,7 @@ canvas {
 input[type="text"] {
 	display: none;
 }
+
+#UserLogin_username, #RegistrationForm_username, #UserRecoveryForm_login_or_email, #RegistrationForm_verifyCode, #RegistrationForm_email {
+	display: inline;
+}

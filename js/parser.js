@@ -44,7 +44,15 @@ function parseReply( text ) {
 				holygrail = hero.userId;
 
 				console.log(hero);
+
 				gameReady = true;
+
+				serverMessage = {
+					xcommand: 'ROOMUPDATE',
+					xvalue: 0
+				};
+				send(JSON.stringify(serverMessage));
+
 			}
 
 			else if (xcommand == 'ADDBULLET') {
@@ -64,19 +72,26 @@ function parseReply( text ) {
 					};
 				}
 
-				// bullets[xvalue.bulletId].id = xvalue.bulletId;
-				// bullets[xvalue.bulletId].currentX = xvalue.currentX;
-				// bullets[xvalue.bulletId].currentY = xvalue.currentY;
-				// bullets[xvalue.bulletId].targetX = xvalue.targetX;
-				// bullets[xvalue.bulletId].targetY = xvalue.targetY;
-				// bullets[xvalue.bulletId].trajX = xvalue.trajX;
-				// bullets[xvalue.bulletId].trajY = xvalue.trajY;
-				// bullets[xvalue.bulletId].userId = xvalue.userId;
-				// bullets[xvalue.bulletId].roomId = xvalue.roomId;
-				// bullets[xvalue.bulletId].hadImpact = xvalue.hadImpact;
+			}
 
+			else if (xcommand == 'ADDBULLETE') {
+				//console.log(xvalue);
+				virusBlastSound.play();
+				if (!bullets[xvalue.bulletId]) {
+					bullets[xvalue.bulletId] = {
+						id: xvalue.bulletId,
+						currentX: xvalue.currentX,
+						currentY: xvalue.currentY,
+						targetX: xvalue.targetX,
+						targetY: xvalue.targetY,
+						trajX: xvalue.trajX,
+						trajY: xvalue.trajY,
+						userId: xvalue.userId,
+						roomId: xvalue.roomId,
+						hadImpact: xvalue.hadImpact
+					};
+				}
 
-				//console.log(bullets);
 			}
 
 			else if (xcommand == 'ADDTOSTORAGE') {
@@ -162,6 +177,24 @@ function parseReply( text ) {
 				pageArray = [];
 				currentPage = 1;
 				maxPage = 1;
+			}
+
+			else if (xcommand == 'MINEENTITY') {
+				var minedEntityId = xvalue;
+
+				if (otherEntities[minedEntityId].type == 'fragment') {
+					hero.credits += otherEntities[minedEntityId].eeg;
+				}
+				else if (otherEntities[minedEntityId].type == 'codebit') {
+					hero.snippets += otherEntities[minedEntityId].eeg;
+				}
+
+				var serverCommandME = {
+				xcommand: 'REMOVEENTITY',
+				xvalue: minedEntityId
+				};
+				send(JSON.stringify(serverCommandME));
+
 			}
 
 			else if (xcommand == 'OTHERENTITY') {
@@ -269,6 +302,11 @@ function parseReply( text ) {
 				hero[bonusTypeAttr] += bonusChange;
 			}
 
+			else if (xcommand == 'RAISECREDITS') {
+				var creditsRaise = xvalue;
+				hero.credits += (creditsRaise * 1);
+			}
+
 			else if (xcommand == 'RAISEEEG') {
 				var eegRaise = xvalue;
 				hero.eeg += (eegRaise * 1);
@@ -317,11 +355,12 @@ function parseReply( text ) {
 				var entEegReduction = xvalue.amount;
 				var entEegId = xvalue.entityId;
 				
-					//console.log('entity damaged');
 				if (otherEntities[entEegId]) {
+					console.log('entity damaged');
 					otherEntities[entEegId].eeg -= (entEegReduction * 1);
 				
-					if (otherEntities[entEegId].eeg < 0) {
+					if (otherEntities[entEegId].eeg <= 0) {
+						console.log('entity flatlined');
 						var serverCommandREE = {
 						xcommand: 'REMOVEENTITY',
 						xvalue: entEegId
@@ -364,11 +403,12 @@ function parseReply( text ) {
 				progressBar = 0;
 				barOriginal = progressBar;
 				barCommand = '';
-				barParam = '';
+				barParam = {};
 			}
 
 			else if (xcommand == 'ROOMUPDATE') {
 				closeAllMenus();
+				selectedEntity = 0;
 				roomName = xvalue.name;
 				roomType = xvalue.type;
 				roomOwner = xvalue.owner;
@@ -411,32 +451,17 @@ function parseReply( text ) {
 					}
 				}
 			}
-			
-			else if (xcommand == 'CREATEBULLET') {
-				// received chat text
-				var bulletUserId = args.shift();
-				var currentX = args.shift();
-				var currentY = args.shift();
-				var targetX = args.shift();
-				var targetY = args.shift();
 
-				var trajX = targetX - currentX;
-				var trajY = targetY - currentY;
+			else if (xcommand == 'UPGRADEITEM') {
+				var upgradedItem = xvalue.itemId;
+				var newName = xvalue.newName;
 
+				storagePrograms[upgradedItem].name = newName;
+				storagePrograms[upgradedItem].rating += 1;
+				storagePrograms[upgradedItem].upgrades += 1;
 
-				bullets.push({
-					currentX: currentX * 1,
-					currentY: currentY * 1,
-					targetX: targetX * 1,
-					targetY: targetY * 1,
-					trajX: trajX,
-					trajY: trajY,
-					userId: bulletUserId * 1
-				});
+				upgradeItemSound.play();
 
-				//console.log(bullets);
-
-				
 			}
 
 			else if (xcommand == 'FLATLINE') {
@@ -461,6 +486,7 @@ function parseReply( text ) {
 			}
 						
 			else if (xcommand == 'REMOVEUSER') {
+				console.log('removed a user from the room');
 				var removeUserSocketId = xvalue;
 				if (otherUsers[removeUserSocketId]) {
 					otherUsers[removeUserSocketId].x = -9999;
