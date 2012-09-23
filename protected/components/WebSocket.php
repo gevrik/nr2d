@@ -316,7 +316,7 @@ class WebSocket
 
 		$nextPingCheck = time() + 1;
 		$nextSpawnCheck = time() + 300;
-		$nextEcoCheck = time() + 900;
+		//$nextEcoCheck = time() + 900;
 		$nextMobCheck = time() + 2;
 		while (isset($this->wsRead[0])) {
 			$changed = $this->wsRead;
@@ -383,10 +383,10 @@ class WebSocket
 				$nextMobCheck = time() + 2;
 			}
 
-			if (time() >= $nextEcoCheck) {
-				$this->wsEcoStuff();
-				$nextEcoCheck = time() + 900;
-			}
+			// if (time() >= $nextEcoCheck) {
+			// 	$this->wsEcoStuff();
+			// 	$nextEcoCheck = time() + 900;
+			// }
 
 		}
 

@@ -32,10 +32,10 @@ class SiteController extends Controller
 		// using the default layout 'protected/views/layouts/main.php'
 		
 		if (!$userObject) {
-			$this->redirect(Yii::app()->createUrl('/user/login'));
+			$this->redirect(Yii::app()->createUrl('/l'));
 		}
 		else {
-			$this->redirect(Yii::app()->createUrl('/room/play'));	
+			$this->redirect(Yii::app()->createUrl('/p'));	
 		}
 
 	}

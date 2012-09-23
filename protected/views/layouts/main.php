@@ -3,7 +3,9 @@
 <html lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<?php $this->display_seo(); ?>
 	<meta name="language" content="en" />
+	<link rel="icon" type="image/ico" href="../images/favicon.ico">
 
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap.css" />
 	<?php Yii::app()->clientScript->registerScriptFile(Yii::app()->request->baseUrl . '/js/bootstrap.js'); ?>

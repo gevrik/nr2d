@@ -5,45 +5,48 @@ $this->breadcrumbs=array(
 );
 ?>
 
-<?php if(Yii::app()->user->hasFlash('loginMessage')): ?>
 
-<div class="success">
-	<?php echo Yii::app()->user->getFlash('loginMessage'); ?>
+<div class="loginFormContainer">
+	<?php if(Yii::app()->user->hasFlash('loginMessage')): ?>
+
+	<div class="success">
+		<?php echo Yii::app()->user->getFlash('loginMessage'); ?>
+	</div>
+
+	<?php endif; ?>
+
+	<div class="form well">
+	<?php echo CHtml::beginForm(); ?>
+
+		<?php echo CHtml::errorSummary($model); ?>
+		
+		<div class="control-group">
+			<?php echo CHtml::activeLabelEx($model,'username'); ?>
+			<?php echo CHtml::activeTextField($model,'username') ?>
+		</div>
+		
+		<div class="control-group">
+			<?php echo CHtml::activeLabelEx($model,'password'); ?>
+			<?php echo CHtml::activePasswordField($model,'password') ?>
+		</div>
+		
+		<div class="control-group">
+			<p class="hint">
+			<?php echo CHtml::link(UserModule::t("Register"),Yii::app()->getModule('user')->registrationUrl); ?> | <?php echo CHtml::link(UserModule::t("Lost Password?"),Yii::app()->getModule('user')->recoveryUrl); ?>
+			</p>
+		</div>
+		
+		<div class="control-group rememberMe">
+			<?php echo CHtml::activeCheckBox($model,'rememberMe'); ?><?php echo CHtml::activeLabelEx($model,'rememberMe'); ?>
+		</div>
+
+		<div class="control-group submit">
+			<?php echo CHtml::submitButton(UserModule::t("Login")); ?>
+		</div>
+		
+	<?php echo CHtml::endForm(); ?>
+	</div><!-- form -->
 </div>
-
-<?php endif; ?>
-
-<div class="form">
-<?php echo CHtml::beginForm(); ?>
-
-	<?php echo CHtml::errorSummary($model); ?>
-	
-	<div class="control-group">
-		<?php echo CHtml::activeLabelEx($model,'username'); ?>
-		<?php echo CHtml::activeTextField($model,'username') ?>
-	</div>
-	
-	<div class="control-group">
-		<?php echo CHtml::activeLabelEx($model,'password'); ?>
-		<?php echo CHtml::activePasswordField($model,'password') ?>
-	</div>
-	
-	<div class="control-group">
-		<p class="hint">
-		<?php echo CHtml::link(UserModule::t("Register"),Yii::app()->getModule('user')->registrationUrl); ?> | <?php echo CHtml::link(UserModule::t("Lost Password?"),Yii::app()->getModule('user')->recoveryUrl); ?>
-		</p>
-	</div>
-	
-	<div class="control-group rememberMe">
-		<?php echo CHtml::activeCheckBox($model,'rememberMe'); ?><?php echo CHtml::activeLabelEx($model,'rememberMe'); ?>
-	</div>
-
-	<div class="control-group submit">
-		<?php echo CHtml::submitButton(UserModule::t("Login")); ?>
-	</div>
-	
-<?php echo CHtml::endForm(); ?>
-</div><!-- form -->
 
 
 <?php
