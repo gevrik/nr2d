@@ -326,7 +326,7 @@ $(document).bind('keyup', '1', function(){
 				}
 			});
 
-			if (executeProgram !== 0) {
+			if (executeProgram !== 0 && progressBar === 0) {
 				console.log('shortcut 1');
 				progressBar = 2000;
 				barOriginal = progressBar;
@@ -381,6 +381,31 @@ $(document).bind('keyup', '2', function(){
 			showInventoryMenu = false;
 			showItemMenu = true;
 		}
+		else if (selectedEntity !== 0) {
+			var currentProgram = 0;
+			var executeProgram = 0;
+
+			jQuery.each(memoryPrograms, function(i, val) {
+				if (memoryPrograms[i]) {
+					++currentProgram;
+					if (currentProgram == 2) {
+						executeProgram = memoryPrograms[i].id;
+					}
+				}
+			});
+
+			if (executeProgram !== 0 && progressBar === 0) {
+				console.log('shortcut 2');
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'EXECUTEPROGRAM';
+				barParam = {
+					programId: executeProgram,
+					entityId: selectedEntity
+				};
+				showMemProgId = executeProgram;
+			}
+		}
 	}
 });
 
@@ -415,6 +440,31 @@ $(document).bind('keyup', '3', function(){
 			availableChoices = [];
 			showInventoryMenu = false;
 			showItemMenu = true;
+		}
+		else if (selectedEntity !== 0) {
+			var currentProgram = 0;
+			var executeProgram = 0;
+
+			jQuery.each(memoryPrograms, function(i, val) {
+				if (memoryPrograms[i]) {
+					++currentProgram;
+					if (currentProgram == 3) {
+						executeProgram = memoryPrograms[i].id;
+					}
+				}
+			});
+
+			if (executeProgram !== 0 && progressBar === 0) {
+				console.log('shortcut 3');
+				progressBar = 2000;
+				barOriginal = progressBar;
+				barCommand = 'EXECUTEPROGRAM';
+				barParam = {
+					programId: executeProgram,
+					entityId: selectedEntity
+				};
+				showMemProgId = executeProgram;
+			}
 		}
 	}
 });
@@ -496,7 +546,7 @@ $(document).bind('keyup', '6', function(){
 			barOriginal = progressBar;
 			barCommand = 'CREATENODE';
 			barParam = {
-				direction: west
+				direction: 'west'
 			};
 			showMenu = false;
 		}

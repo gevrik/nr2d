@@ -36,7 +36,7 @@ class AreaController extends Controller
                     'users'=>array('@'),
             ),
             array('allow', // allow admin user to perform 'admin' and 'delete' actions
-                    'actions'=>array('admin','delete','create','update','index','view', 'createRandom'),
+                    'actions'=>array('admin','delete','create','update','index','view', 'createRandom', 'resetAreas'),
                     'users'=>Yii::app()->getModule('user')->getAdmins(),
             ),
             array('deny',  // deny all users
@@ -54,6 +54,63 @@ class AreaController extends Controller
 		$this->render('view',array(
 			'model'=>$this->loadModel($id),
 		));
+	}
+
+	public function actionResetAreas()
+	{
+		$users = User::model()->findAll();
+
+		$area = new Area;
+		$area->userId = 0;
+		$area->created = date( 'Y-m-d H:i:s', time());
+		$area->name = "The Chatsubo";
+		$area->accessCode = md5(time());
+		$area->level = 1;
+		$area->save();
+
+		$room = new Room;
+		$room->areaId = $area->id;
+		$room->userId = 0;
+		$room->created = date( 'Y-m-d H:i:s', time());
+		$room->type = 'io';
+		$room->level = 1;
+		$room->x = 0;
+		$room->y = 0;
+		$room->name = 'The Chatsubo Lobby';
+		$room->description = 'The lobby of the legendary Chatsubo Internet Cafe in Chiba City, Tokyo.';
+		$room->save();
+
+		foreach ($users as $model) {
+			// create user area
+			$area = new Area;
+			$area->userId = $model->id;
+			$area->created = date( 'Y-m-d H:i:s', time());
+			$area->name = ucfirst(CHtml::encode($model->username)) . "'s Home System";
+			$area->accessCode = md5($model->id);
+			$area->level = 1;
+			$area->save();
+
+			// create io port in area
+			$room = new Room;
+			$room->areaId = $area->id;
+			$room->userId = $model->id;
+			$room->created = date( 'Y-m-d H:i:s', time());
+			$room->type = 'io';
+			$room->level = 1;
+			$room->x = 0;
+			$room->y = 0;
+			$room->name = ucfirst(CHtml::encode($model->username)) . "'s IO PORT";
+			$room->description = 'A standard input-output port node.';
+			$room->save();
+
+			$model->profile->location = $room->id;
+			$model->profile->homenode = $room->id;
+			if ($model->profile->credits < 10000) {
+				$model->profile->credits = 10000;
+			}
+			$model->profile->save(false);
+		}
+
 	}
 
 	public function actionCreateRandom()

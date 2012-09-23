@@ -145,12 +145,14 @@ function parseReply( text ) {
 
 			else if (xcommand == 'DELETEBULLET') {
 				if (bullets[xvalue]) {
-					var explosionX = bullets[xvalue].currentX;
-					var explosionY = bullets[xvalue].currentY;
-					ctx.beginPath();
-					ctx.arc(explosionX, explosionY, 16, 0, 2 * Math.PI, false);
-					ctx.fillStyle = "rgb(255, 0, 0)";
-					ctx.fill();
+					if (bullets[xvalue].roomId == hero.roomId) {
+						var explosionX = bullets[xvalue].currentX;
+						var explosionY = bullets[xvalue].currentY;
+						ctx.beginPath();
+						ctx.arc(explosionX, explosionY, 16, 0, 2 * Math.PI, false);
+						ctx.fillStyle = "rgb(255, 0, 0)";
+						ctx.fill();
+					}
 					delete bullets[xvalue];
 				}
 			}
@@ -486,7 +488,7 @@ function parseReply( text ) {
 			}
 						
 			else if (xcommand == 'REMOVEUSER') {
-				console.log('removed a user from the room');
+				//console.log('removed a user from the room');
 				var removeUserSocketId = xvalue;
 				if (otherUsers[removeUserSocketId]) {
 					otherUsers[removeUserSocketId].x = -9999;

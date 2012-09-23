@@ -14,7 +14,7 @@ var update = function (modifier) {
 			executingSound.playbackRate = 1.0;
 		}
 		else if (progressBar == 10000) {
-			executingSound.playbackRate = 0.75;
+			executingSound.playbackRate = 0.80;
 		}
 
 		executingSound.play();
@@ -182,18 +182,19 @@ var update = function (modifier) {
 
 									bullets[i].currentX = -9999;
 									bullets[i].currentY = -9999;
-									
-									var serverMessage = {
-										xcommand: 'DELETEBULLET',
-										xvalue: i
-									};
-									send(JSON.stringify(serverMessage));
-									serverMessage = {
-										xcommand: 'DAMAGEENTITY',
-										xvalue: otherEntities[ie].id
-									};
-									send(JSON.stringify(serverMessage));
-									console.log(serverMessage);
+
+									if (hero.userId == bullets[i].userId) {		var serverMessage = {
+											xcommand: 'DELETEBULLET',
+											xvalue: i
+										};
+										send(JSON.stringify(serverMessage));
+										serverMessage = {
+											xcommand: 'DAMAGEENTITY',
+											xvalue: otherEntities[ie].id
+										};
+										send(JSON.stringify(serverMessage));
+										console.log(serverMessage);
+									}
 								}
 							}
 						}

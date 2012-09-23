@@ -43,9 +43,11 @@ class WSChatAction
             }
 
             foreach ($Server->wsClients as $checkClientId => $checkClient) {
-                if ($Server->wsUsers[$checkClientId]['userId'] == $userObject->id) {
-                    $Server->wsClose($clientID);
-                    return;
+                if (isset($Server->wsUsers[$checkClientId])) {
+                    if ($Server->wsUsers[$checkClientId]['userId'] == $userObject->id) {
+                        $Server->wsClose($clientID);
+                        return;
+                    }
                 }
             }
 
@@ -207,7 +209,7 @@ class WSChatAction
 
             foreach ( $Server->wsClients as $id => $client ) {
                 //$Server->log('socket found');
-                if ($Server->wsUsers[$id]['roomId'] == $Server->wsBullets[$currentBullets]['roomId']) {
+                if (isset($Server->wsUsers[$id]) && $Server->wsUsers[$id]['roomId'] == $Server->wsBullets[$currentBullets]['roomId']) {
                     $Server->wsSend($id, json_encode($returnCommand));
                     //$Server->log('bullet sent');
                 }
@@ -459,9 +461,7 @@ class WSChatAction
         else if ($xcommand == 'DAMAGEENTITY') {
             $damagedEntityId = $parsed->xvalue;
 
-
-
-            if ($Server->wsEntities[$damagedEntityId]) {
+            if (isset($Server->wsEntities[$damagedEntityId])) {
 
                 $Server->wsEntities[$damagedEntityId]['eeg'] -= 1;
 
@@ -474,7 +474,7 @@ class WSChatAction
                 );
 
                 foreach ($Server->wsClients as $id => $client) {
-                    if ($Server->wsUsers[$id]['roomId'] == $Server->wsEntities[$damagedEntityId]['roomId']) {
+                    if (isset($Server->wsUsers[$id]) && $Server->wsUsers[$id]['roomId'] == $Server->wsEntities[$damagedEntityId]['roomId']) {
                         $Server->wsSend($id, json_encode($returnCommand));
                     }
                 }
@@ -558,7 +558,7 @@ class WSChatAction
 
                         }
 
-                        if ($Server->wsPrograms[$executeProgId]['type'] == 'dataminer' && $entityFound != -1) {
+                        if ($Server->wsPrograms[$executeProgId]['type'] == 'dataminer' && $entityId != -1) {
 
                             $Server->log('datamining');
                             $entityFound = $entityId;
@@ -903,24 +903,27 @@ class WSChatAction
             $entityId = $parsed->xvalue;
             $Server->log($entityId);
 
-            if ($Server->wsEntities[$entityId]) {
+            if (isset($Server->wsEntities[$entityId])) {
 
                 $entityObject = Entity::model()->findByPk($entityId);
+                $currentRoom = $entityObject->roomId;
                 $entityObject->roomId = 0;
-
                 $entityObject->save(false);
 
-                $Server->wsEntities[$entityId]['roomId'] = 0;
-                $Server->wsRooms[$Server->wsEntities[$entityId]['roomId']]['entityAmount'] -= 1;
+                if (isset($Server->wsRooms[$currentRoom])) {
+                    $Server->wsRooms[$currentRoom]['entityAmount'] -= 1;
 
-                $returnCommand = array(
-                    'xcommand' => 'REMOVEENTITY',
-                    'xvalue' => $entityId
-                );
+                    $returnCommand = array(
+                        'xcommand' => 'REMOVEENTITY',
+                        'xvalue' => $entityId
+                    );
 
-                foreach ($Server->wsClients as $id => $client) {
-                    if ($Server->wsClients[$id]['roomId'] == $Server->wsEntities[$entityId]['roomId'])
-                    $Server->wsSend($id, json_encode($returnCommand));
+                    foreach ($Server->wsClients as $id => $client) {
+                        if ($Server->wsUsers[$id]['roomId'] == $currentRoom)
+                        $Server->wsSend($id, json_encode($returnCommand));
+                    }
+
+                    $Server->wsEntities[$entityId]['roomId'] = 0;
                 }
             }
 
@@ -929,7 +932,7 @@ class WSChatAction
         else if ($xcommand == 'ROOMUPDATE') {
 
             $room = Room::model()->findByPk($Server->wsUsers[$clientID]['roomId']);
-            //$Server->log($room->name);
+            $Server->log($room->name);
             $roomOwnerName = ($room->userId == 0) ? 'System' : CHtml::encode($room->user->username);
 
             $northExit = $room->getExit('north');
@@ -1167,12 +1170,12 @@ class WSChatAction
                             'eeg' => (int)$entity['eeg'],
                             'userId' => (int)$entity['userId'],
                             'type' => $entity['type'],
-                            'targetX' => $entity['targetX'],
-                            'targetY' => $entity['targetY'],
-                            'trajX' => $entity['trajX'],
-                            'trajY' => $entity['trajY'],
-                            'speed' => $entity['entity'],
-                            'moveTimer' => $entity['moveTimer']
+                            'targetX' => (int)$entity['targetX'],
+                            'targetY' => (int)$entity['targetY'],
+                            'trajX' => (int)$entity['trajX'],
+                            'trajY' => (int)$entity['trajY'],
+                            'speed' => 32,
+                            'moveTimer' => (int)$entity['moveTimer']
                         )
                     );
 
@@ -1202,7 +1205,7 @@ class WSChatAction
 
                 if ($room->type == 'database') {
 
-                    $bonusMB = (($room->level + 1) * ($roomLevel + 1)) - ($room->level * $room->level);
+                    $bonusMB = (($room->level + 1) * ($room->level + 1)) - ($room->level * $room->level);
 
                     $returnCommand = array(
                         'xcommand' => 'RAISEMAXSTORAGE',
@@ -1213,7 +1216,7 @@ class WSChatAction
                 }
 
                 if ($room->type == 'coproc') {
-                    $bonusMB = (($room->level + 1) * ($roomLevel + 1)) - ($room->level * $room->level);
+                    $bonusMB = (($room->level + 1) * ($room->level + 1)) - ($room->level * $room->level);
 
                     $returnCommand = array(
                         'xcommand' => 'RAISEMAXMEMORY',
@@ -1233,7 +1236,7 @@ class WSChatAction
                 $Server->wsSend($clientID, json_encode($returnCommand));
 
                 foreach ( $Server->wsClients as $id => $client ) {
-                    if ( $id != $clientID && $Server->wsUsers[$id]['roomId'] == $Server->wsUsers[$clientID]['roomId']) {
+                    if ( isset($Server->wsUsers[$id]) && $id != $clientID && $Server->wsUsers[$id]['roomId'] == $Server->wsUsers[$clientID]['roomId']) {
                         $Server->wsSend($id, json_encode($returnCommand));
                     }
                 }
@@ -1243,60 +1246,63 @@ class WSChatAction
         }
 
         else if ($xcommand = 'UPGRADEPROGRAM') {
-            $program = Program::model()->findByPk($parsed->xvalue->id);
-            $upgrader = $Server->wsUsers[$clientID];
-            
-            $creditsCost = ($program->rating * $program->rating) * 1000;
-            $snippetsCost = ($program->rating * $program->rating) * 10;
-
-            if ($program->maxUpgrades > $program->upgrades &&
-                $creditsCost <= $upgrader['credits'] &&
-                $snippetsCost <= $upgrader['snippets'] &&
-                $program->rating < 8
-            ) {
-                $userObject = User::model()->findByPk($Server->wsUsers[$clientID]['userId']);
-                $userObject->profile->credits -= $creditsCost;
-                $userObject->profile->snippets -= $snippetsCost;
-                $userObject->profile->save(false);
-                $returnCommand = array(
-                    'xcommand' => 'CREDITSCHANGE',
-                    'xvalue' => $creditsCost
-                );
-                $Server->wsSend($clientID, json_encode($returnCommand));
-                $Server->wsUsers[$clientID]['credits'] -= $creditsCost;
-                $returnCommand = array(
-                    'xcommand' => 'SNIPPETSCHANGE',
-                    'xvalue' => $snippetsCost
-                );
-                $Server->wsSend($clientID, json_encode($returnCommand));
-                $Server->wsUsers[$clientID]['snippets'] -= $snippetsCost;
-
-                $program->rating += 1;
-                $program->upgrades += 1;
-                $newProgName = substr_replace($program->name ,"",-3);
-                $program->name = $newProgName . $program->rating . '.0';
+            if (isset($parsed->xvalue->id)) {
+                $program = Program::model()->findByPk($parsed->xvalue->id);
+                $upgrader = $Server->wsUsers[$clientID];
                 
-                $program->save(false);
+                $creditsCost = ($program->rating * $program->rating) * 1000;
+                $snippetsCost = ($program->rating * $program->rating) * 10;
 
-                $Server->wsPrograms[$program->id]['rating'] += 1;
-                $Server->wsPrograms[$program->id]['upgrades'] += 1;
-                $Server->wsPrograms[$program->id]['name'] = $newProgName . $program->rating . '.0';
+                if ($program->maxUpgrades > $program->upgrades &&
+                    $creditsCost <= $upgrader['credits'] &&
+                    $snippetsCost <= $upgrader['snippets'] &&
+                    $program->rating < 8
+                ) {
+                    $userObject = User::model()->findByPk($Server->wsUsers[$clientID]['userId']);
+                    $userObject->profile->credits -= $creditsCost;
+                    $userObject->profile->snippets -= $snippetsCost;
+                    $userObject->profile->save(false);
+                    $returnCommand = array(
+                        'xcommand' => 'CREDITSCHANGE',
+                        'xvalue' => $creditsCost
+                    );
+                    $Server->wsSend($clientID, json_encode($returnCommand));
+                    $Server->wsUsers[$clientID]['credits'] -= $creditsCost;
+                    $returnCommand = array(
+                        'xcommand' => 'SNIPPETSCHANGE',
+                        'xvalue' => $snippetsCost
+                    );
+                    $Server->wsSend($clientID, json_encode($returnCommand));
+                    $Server->wsUsers[$clientID]['snippets'] -= $snippetsCost;
 
-                $returnCommand = array(
-                    'xcommand' => 'UPGRADEITEM',
-                    'xvalue' => array(
-                        'itemId' => $program->id,
-                        'newName' => $newProgName . $program->rating . '.0',
-                    )
-                );
-                $Server->wsSend($clientID, json_encode($returnCommand));
+                    $program->rating += 1;
+                    $program->upgrades += 1;
+                    $newProgName = substr_replace($program->name ,"",-3);
+                    $program->name = $newProgName . $program->rating . '.0';
+                    
+                    $program->save(false);
 
-                $returnCommand = array(
-                    'xcommand' => 'SYSMSG',
-                    'xvalue' => '> program upgraded'
-                );
-                $Server->wsSend($clientID, json_encode($returnCommand));
+                    $Server->wsPrograms[$program->id]['rating'] += 1;
+                    $Server->wsPrograms[$program->id]['upgrades'] += 1;
+                    $Server->wsPrograms[$program->id]['name'] = $newProgName . $program->rating . '.0';
 
+                    $returnCommand = array(
+                        'xcommand' => 'UPGRADEITEM',
+                        'xvalue' => array(
+                            'itemId' => $program->id,
+                            'newName' => $newProgName . $program->rating . '.0',
+                        )
+                    );
+                    $Server->wsSend($clientID, json_encode($returnCommand));
+
+                    $returnCommand = array(
+                        'xcommand' => 'SYSMSG',
+                        'xvalue' => '> program upgraded'
+                    );
+                    $Server->wsSend($clientID, json_encode($returnCommand));
+
+
+                }
 
             }
 

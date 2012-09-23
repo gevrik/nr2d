@@ -1261,7 +1261,7 @@ class WebSocket
 
 					$entity->save();
 
-					$this->wsEntities[$entity->id] = array('entityId' => $entity->id, 'userId' => $entity->userId, 'roomId' => $entity->roomId, 'type' => $entity->type, 'attack' => $entity->attack, 'defend' => $entity->defend, 'stealth' => $entity->stealth, 'detect' => $entity->detect, 'eeg' => $entity->eeg, 'x' => $entity->x, 'y' => $entity->y, 'credits' => $entity->credits);
+					$this->wsEntities[$entity->id] = array('entityId' => $entity->id, 'userId' => $entity->userId, 'roomId' => $entity->roomId, 'type' => $entity->type, 'attack' => $entity->attack, 'defend' => $entity->defend, 'stealth' => $entity->stealth, 'detect' => $entity->detect, 'eeg' => $entity->eeg, 'x' => $entity->x, 'y' => $entity->y, 'credits' => $entity->credits, 'targetX' => $entity->x, 'targetY' => $entity->y, 'trajX' => 0, 'trajY' => 0, 'speed' => 32, 'moveTimer' => 0);
 				}
 
 	    	}
@@ -1288,7 +1288,7 @@ class WebSocket
 
 					$entity->save();
 
-					$this->wsEntities[$entity->id] = array('entityId' => $entity->id, 'userId' => $entity->userId, 'roomId' => $entity->roomId, 'type' => $entity->type, 'attack' => $entity->attack, 'defend' => $entity->defend, 'stealth' => $entity->stealth, 'detect' => $entity->detect, 'eeg' => $entity->eeg, 'x' => $entity->x, 'y' => $entity->y, 'credits' => $entity->credits);
+					$this->wsEntities[$entity->id] = array('entityId' => $entity->id, 'userId' => $entity->userId, 'roomId' => $entity->roomId, 'type' => $entity->type, 'attack' => $entity->attack, 'defend' => $entity->defend, 'stealth' => $entity->stealth, 'detect' => $entity->detect, 'eeg' => $entity->eeg, 'x' => $entity->x, 'y' => $entity->y, 'credits' => $entity->credits, 'targetX' => $entity->x, 'targetY' => $entity->y, 'trajX' => 0, 'trajY' => 0, 'speed' => 32, 'moveTimer' => 0);
 				}
 			}
 

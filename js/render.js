@@ -4,6 +4,8 @@ var render = function () {
 	if (gameReady) {
 
 		ctx.clearRect ( 0 , 0 , canvas.width , canvas.height );
+		ctxEffects.clearRect ( 0 , 0 , canvas.width , canvas.height );
+		ctxLog.clearRect ( 0 , 0 , canvas.width , canvas.height );
 
 		if (bgReady) {
 			ctx.drawImage(bgImage, 0, 0);
@@ -199,12 +201,12 @@ var render = function () {
 		ctx.strokeStyle = 'rgba(40,40,40,1)';
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		ctx.rect(4,14,110,20);
+		ctx.rect(4,2,110,20);
 		ctx.fill();
 		ctx.stroke();
 
 		ctx.beginPath();
-		ctx.rect(4,37,110,20);
+		ctx.rect(4,24,110,20);
 		ctx.fill();
 		ctx.stroke();
 

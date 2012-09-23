@@ -16,18 +16,19 @@ var FancyWebSocket = function(url)
 	};
 
 	this.connect = function() {
-		if ( typeof(MozWebSocket) == 'function' )
-			this.conn = new MozWebSocket(url);
-		else
-			this.conn = new WebSocket(url);
+		// if ( typeof(MozWebSocket) == 'function' )
+		// 	this.conn = new MozWebSocket(url);
+		// else
+		
+		this.conn = new WebSocket(url);
 
 		// dispatch to the right handlers
 		this.conn.onmessage = function(evt){
 			dispatch('message', evt.data);
 		};
 
-		this.conn.onclose = function(){dispatch('close',null)}
-		this.conn.onopen = function(){dispatch('open',null)}
+		this.conn.onclose = function(){dispatch('close',null);};
+		this.conn.onopen = function(){dispatch('open',null);};
 	};
 
 	this.disconnect = function() {
