@@ -68,29 +68,38 @@ function parseReply( text ) {
 						trajY: xvalue.trajY,
 						userId: xvalue.userId,
 						roomId: xvalue.roomId,
-						hadImpact: xvalue.hadImpact
+						hadImpact: xvalue.hadImpact,
+						damage: xvalue.damage
 					};
+				}
+				else {
+					//console.log('bug fixed?');
+					bullets[xvalue.bulletId].id = xvalue.bulletId;
+					bullets[xvalue.bulletId].currentX = xvalue.currentX;
+					bullets[xvalue.bulletId].currentY = xvalue.currentY;
+					bullets[xvalue.bulletId].targetX = xvalue.targetX;
+					bullets[xvalue.bulletId].targetY = xvalue.targetY;
+					bullets[xvalue.bulletId].trajX = xvalue.trajX;
+					bullets[xvalue.bulletId].trajY = xvalue.trajY;
+					bullets[xvalue.bulletId].userId = xvalue.userId;
+					bullets[xvalue.bulletId].roomId = xvalue.roomId;
+					bullets[xvalue.bulletId].hadImpact = xvalue.hadImpact;
+					bullets[xvalue.bulletId].damage = xvalue.damage;
 				}
 
 			}
 
-			else if (xcommand == 'ADDBULLETE') {
-				//console.log(xvalue);
-				virusBlastSound.play();
-				if (!bullets[xvalue.bulletId]) {
-					bullets[xvalue.bulletId] = {
-						id: xvalue.bulletId,
-						currentX: xvalue.currentX,
-						currentY: xvalue.currentY,
-						targetX: xvalue.targetX,
-						targetY: xvalue.targetY,
-						trajX: xvalue.trajX,
-						trajY: xvalue.trajY,
-						userId: xvalue.userId,
-						roomId: xvalue.roomId,
-						hadImpact: xvalue.hadImpact
-					};
-				}
+			else if (xcommand == 'ADDBOMB') {
+				console.log(xvalue);
+
+				bombs.push({
+					userId: xvalue.userId,
+					x: xvalue.x,
+					y: xvalue.y,
+					roomId: xvalue.roomId,
+					damage: xvalue.damage,
+					fuse: 50
+				});
 
 			}
 
@@ -124,6 +133,25 @@ function parseReply( text ) {
 
 			}
 
+			else if (xcommand == 'ADDAC') {
+
+				if (!accessCodes[xvalue.id]) {
+					accessCodes[xvalue.id] = {
+						id: xvalue.id,
+						roomId: xvalue.roomId,
+						userId: xvalue.userId,
+						name: xvalue.roomName
+					};
+				}
+
+				//console.log(accessCodes);
+
+			}
+
+			else if (xcommand == 'CHANGEFIREMODE') {
+				fireMode = xvalue;
+			}
+
 			else if (xcommand == 'CHAT') {
 				// received chat text
 				showLog = true;
@@ -155,6 +183,44 @@ function parseReply( text ) {
 					}
 					delete bullets[xvalue];
 				}
+			}
+
+			else if (xcommand == 'DELETEPROGRAM') {
+				if (storagePrograms[xvalue]) {
+					delete storagePrograms[xvalue];
+				}
+			}
+
+			else if (xcommand == 'GENERATECODEPAGES') {
+				console.log('generating pages');
+				var codeCounter = 0;
+				maxPage = 1;
+				currentPage = 1;
+				pageArray = [];
+
+				jQuery.each(accessCodes, function(i, val) {
+					if (accessCodes[i]) {
+						++codeCounter;
+
+						pageArray.push({
+							id: accessCodes[i].id,
+							page: currentPage,
+							hotkey: codeCounter,
+							roomId: accessCodes[i].roomId,
+							roomName: accessCodes[i].name
+						});
+
+						if (codeCounter % 9 === 0 ) {
+							++maxPage;
+							++currentPage;
+							
+							codeCounter = 0;
+						}
+					}
+				});
+				currentPage = 1;
+				console.log(pageArray);
+				showACMenu = true;
 			}
 
 			else if (xcommand == 'LOADPROGRAM') {
@@ -329,6 +395,7 @@ function parseReply( text ) {
 
 			else if (xcommand == 'RECALL') {
 				bullets = [];
+				hero.speedMalus = 0;
 				var serverCommand = {
 					xcommand: 'ROOMUPDATE',
 					xvalue: 0
@@ -431,14 +498,13 @@ function parseReply( text ) {
 				}
 			}
 
+			else if (xcommand == 'SPEEDMALUS') {
+				hero.speedMalus = xvalue;
+			}
+
 			else if (xcommand == 'SYSMSG') {
 				// received msg text
-				showLog = true;
-				showLogTimer = 125;
-				logText.unshift({xvalue: xvalue});
-				if (logText.length > 10) {
-					logText.pop();
-				}
+				logIG(xvalue);
 				chatMessage = xvalue;
 				log(chatMessage);
 			}
@@ -452,6 +518,11 @@ function parseReply( text ) {
 						--usedSlots;
 					}
 				}
+			}
+
+			else if (xcommand == 'UPDATESTATS') {
+				var newCredits = xvalue.credits;
+				hero.credits = newCredits;
 			}
 
 			else if (xcommand == 'UPGRADEITEM') {

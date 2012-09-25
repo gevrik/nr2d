@@ -29,6 +29,7 @@ $(document).bind('keyup', 'e', function(){
 		if (showInventoryMenu === false) {
 
 			var programCounter = 0;
+			pageArray = [];
 			maxPage = 1;
 			currentPage = 1;
 
@@ -201,6 +202,9 @@ $(document).bind('keyup', 'r', function(){
 		if (showMemoryMenu === false) {
 			showMemoryMenu = true;
 		}
+		else {
+			showMemoryMenu = false;
+		}
 	}
 });
 
@@ -214,6 +218,21 @@ $(document).bind('keyup', 't', function(){
 				type: 'stealth'
 			};
 			showProgramMenu = false;
+		}
+		else if (showItemMenu === true) {
+			progressBar = 2000;
+			barOriginal = progressBar;
+			barCommand = 'DELETEPROGRAM';
+			barParam = showMemProgId;
+
+			pageArray = [];
+			currentPage = 1;
+			maxPage = 1;
+
+			delete storagePrograms[showMemProgId];
+			showMemProgId = 0;
+
+			showItemMenu = false;
 		}
 	}
 });
@@ -243,11 +262,18 @@ $(document).bind('keyup', 'u', function(){
 $(document).bind('keyup', 'v', function(){
 	if (!$('.message').hasFocus && progressBar === 0) {
 		closeAllMenus();
-		if (combatMode === true) {
-			combatMode = false;
-		}
-		else {
-			combatMode = true;
+		if (roomType != 'io') {
+			if (combatMode === true) {
+				combatMode = false;
+				logIG('> combat mode disabled');
+			}
+			else {
+				combatMode = true;
+				logIG('> combat mode enabled');
+			}
+		} else {
+			logIG('> combat mode not available in io nodes');
+			log('> combat mode not available in io nodes');
 		}
 	}
 });
@@ -293,6 +319,14 @@ $(document).bind('keyup', '1', function(){
 				type: 'firewall'
 			};
 		}
+		else if (showACMenu === true) {
+			progressBar = 5000;
+			barOriginal = progressBar;
+			barCommand = 'CONNECT';
+			barParam = availableChoices[1].roomId;
+			console.log(availableChoices[1].roomId);
+			availableChoices = [];
+		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[1].programId;
 			availableChoices = [];
@@ -312,6 +346,14 @@ $(document).bind('keyup', '1', function(){
 			barParam = {
 				type: 'scanner'
 			};
+		}
+		else if (showCharMenu === true) {
+			progressBar = 2000;
+			barOriginal = progressBar;
+			console.log('showac');
+			barCommand = 'SHOWAC';
+			barParam = 0;
+			showCharMenu = false;
 		}
 		else if (selectedEntity !== 0) {
 			var currentProgram = 0;
@@ -366,6 +408,14 @@ $(document).bind('keyup', '2', function(){
 			showMemoryMenu = false;
 			showItemMenu = true;
 		}
+		else if (showACMenu === true) {
+			progressBar = 5000;
+			barOriginal = progressBar;
+			barCommand = 'CONNECT';
+			barParam = availableChoices[2].roomId;
+			console.log(availableChoices[2].roomId);
+			availableChoices = [];
+		}
 		else if (showProgramMenu === true) {
 			progressBar = 10000;
 			barOriginal = progressBar;
@@ -419,6 +469,15 @@ $(document).bind('keyup', '3', function(){
 				direction: 'north'
 			};
 			showMenu = false;
+		}
+		else if (showProgramMenu === true) {
+			progressBar = 10000;
+			barOriginal = progressBar;
+			barCommand = 'CREATEPROGRAM';
+			barParam = {
+				type: 'radblaster'
+			};
+			showProgramMenu = false;
 		}
 		else if (showNodeMenu === true) {
 			progressBar = 10000;
@@ -480,6 +539,15 @@ $(document).bind('keyup', '4', function(){
 			};
 			showMenu = false;
 		}
+		else if (showProgramMenu === true) {
+			progressBar = 10000;
+			barOriginal = progressBar;
+			barCommand = 'CREATEPROGRAM';
+			barParam = {
+				type: 'gimp'
+			};
+			showProgramMenu = false;
+		}
 		else if (showNodeMenu === true) {
 			progressBar = 10000;
 			barOriginal = progressBar;
@@ -514,6 +582,15 @@ $(document).bind('keyup', '5', function(){
 				direction: 'south'
 			};
 			showMenu = false;
+		}
+		else if (showProgramMenu === true) {
+			progressBar = 10000;
+			barOriginal = progressBar;
+			barCommand = 'CREATEPROGRAM';
+			barParam = {
+				type: 'dropline'
+			};
+			showProgramMenu = false;
 		}
 		else if (showNodeMenu === true) {
 			progressBar = 10000;
@@ -558,6 +635,15 @@ $(document).bind('keyup', '6', function(){
 				type: 'hacking'
 			};
 			showNodeMenu = false;
+		}
+		else if (showProgramMenu === true) {
+			progressBar = 10000;
+			barOriginal = progressBar;
+			barCommand = 'CREATEPROGRAM';
+			barParam = {
+				type: 'logicbomb'
+			};
+			showProgramMenu = false;
 		}
 		else if (showMemoryMenu === true) {
 			showMemProgId = availableChoices[6].programId;

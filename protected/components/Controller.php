@@ -33,28 +33,38 @@ class Controller extends CController
 	public $breadcrumbs=array();
 
 	public function display_seo()
-{
-    // STANDARD TAGS
-    // -------------------------
-    // Title/Desc
-    echo "\t".''.PHP_EOL;
-    echo "\t".'<meta name="description" content="',CHtml::encode($this->pageDesc),'">'.PHP_EOL;
+    {
+        // STANDARD TAGS
+        // -------------------------
+        // Title/Desc
+        echo "\t".''.PHP_EOL;
+        echo "\t".'<meta name="description" content="',CHtml::encode($this->pageDesc),'">'.PHP_EOL;
 
-    // Option for NoIndex
-    if ( $this->pageRobotsIndex == false ) {
-        echo '<meta name="robots" content="noindex">'.PHP_EOL;
+        // Option for NoIndex
+        if ( $this->pageRobotsIndex == false ) {
+            echo '<meta name="robots" content="noindex">'.PHP_EOL;
+        }
+
+        // OPEN GRAPH(FACEBOOK) META
+        // -------------------------
+        if ( !empty($this->pageOgTitle) ) {
+            echo "\t".'<meta property="og:title" content="',CHtml::encode($this->pageOgTitle),'">'.PHP_EOL;
+        }
+        if ( !empty($this->pageOgDesc) ) {
+            echo "\t".'<meta property="og:description" content="',CHtml::encode($this->pageOgDesc),'">'.PHP_EOL;
+        }
+        if ( !empty($this->pageOgImage) ) {
+            echo "\t".'<meta property="og:image" content="',$this->pageOgImage,'">'.PHP_EOL;
+        }
     }
 
-    // OPEN GRAPH(FACEBOOK) META
-    // -------------------------
-    if ( !empty($this->pageOgTitle) ) {
-        echo "\t".'<meta property="og:title" content="',CHtml::encode($this->pageOgTitle),'">'.PHP_EOL;
+    protected function afterRender($view, &$output)
+    {
+        parent::afterRender($view,$output);
+        //Yii::app()->facebook->addJsCallback($js); // use this if you are registering any $js code you want to run asyc
+        Yii::app()->facebook->initJs($output); // this initializes the Facebook JS SDK on all pages
+        Yii::app()->facebook->renderOGMetaTags(); // this renders the OG tags
+        return true;
     }
-    if ( !empty($this->pageOgDesc) ) {
-        echo "\t".'<meta property="og:description" content="',CHtml::encode($this->pageOgDesc),'">'.PHP_EOL;
-    }
-    if ( !empty($this->pageOgImage) ) {
-        echo "\t".'<meta property="og:image" content="',$this->pageOgImage,'">'.PHP_EOL;
-    }
-}
+    
 }

@@ -54,6 +54,14 @@ bulletImage.onload = function () {
 };
 bulletImage.src = "../../images/bullet.png";
 
+// bomb image
+var bombReady = false;
+var bombImage = new Image();
+bombImage.onload = function () {
+	bombReady = true;
+};
+bombImage.src = "../../images/logicbomb.png";
+
 var upgradeItemSound = new Audio("../../sounds/collectammo.ogg");
 var baseBlastSound = new Audio("../../sounds/baseblast.ogg");
 var virusBlastSound = new Audio("../../sounds/virusblast.ogg");

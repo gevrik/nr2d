@@ -1,5 +1,6 @@
 body {
 	background-color:#080808;
+	background: url('../images/main_bg.jpg');
     color:#5fba3d;
     font-family:monospace, prestige;
 }

@@ -3,6 +3,7 @@ var username;
 var holygrail;
 var gameReady = false;
 var combatMode = false;
+var fireMode = 0;
 
 var music = true;
 
@@ -15,6 +16,8 @@ var otherUsers = [];
 var otherEntities = [];
 var memoryPrograms = [];
 var bullets = [];
+var bombs = [];
+var accessCodes = [];
 
 var showMemProgId = 0;
 
@@ -46,7 +49,8 @@ var ctxLog = canvasLog.getContext("2d");
 var hero = {
 	maxMemory: 0,
 	maxStorage: 0,
-	slots: 0
+	slots: 0,
+	speedMalus: 0
 };
 
 var roomName = '';
@@ -68,6 +72,7 @@ var showStorageMenu = false;
 var showInventoryMenu = false;
 var showVirusMenu = false;
 var showItemMenu = false;
+var showACMenu = false;
 
 var showLog = false;
 var showLogTimer = 0;

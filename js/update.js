@@ -2,6 +2,7 @@
 var update = function (modifier) {
 
 	//console.log(modifier);
+	console.log(hero.speedMalus);
 
 	var serverMessage = {};
 
@@ -27,6 +28,8 @@ var update = function (modifier) {
 				xcommand: barCommand,
 				xvalue: barParam
 			};
+
+			console.log(serverMessage);
 
 			send(JSON.stringify(serverMessage));
 			barCommand = '';
@@ -63,22 +66,22 @@ var update = function (modifier) {
 		
 	if (87 in keysDown) { // Player holding up
 		if (!blockControls) {
-			hero.y -= hero.speed * modifier;
+			hero.y -= (hero.speed - hero.speedMalus) * modifier;
 		}
 	}
 	if (83 in keysDown) { // Player holding down
 		if (!blockControls) {
-			hero.y += hero.speed * modifier;
+			hero.y += (hero.speed - hero.speedMalus) * modifier;
 		}
 	}
 	if (65 in keysDown) { // Player holding left
 		if (!blockControls) {
-			hero.x -= hero.speed * modifier;
+			hero.x -= (hero.speed - hero.speedMalus) * modifier;
 		}
 	}
 	if (68 in keysDown) { // Player holding right
 		if (!blockControls) {
-			hero.x += hero.speed * modifier;
+			hero.x += (hero.speed - hero.speedMalus) * modifier;
 		}
 	}
 
@@ -183,14 +186,19 @@ var update = function (modifier) {
 									bullets[i].currentX = -9999;
 									bullets[i].currentY = -9999;
 
-									if (hero.userId == bullets[i].userId) {		var serverMessage = {
+									if (hero.userId == bullets[i].userId) {
+										var serverMessage = {
 											xcommand: 'DELETEBULLET',
 											xvalue: i
 										};
 										send(JSON.stringify(serverMessage));
 										serverMessage = {
 											xcommand: 'DAMAGEENTITY',
-											xvalue: otherEntities[ie].id
+											xvalue: {
+												targetId: otherEntities[ie].id,
+												damage: bullets[i].damage,
+												shooter: bullets[i].userId
+											}
 										};
 										send(JSON.stringify(serverMessage));
 										console.log(serverMessage);
@@ -223,7 +231,10 @@ var update = function (modifier) {
 							send(JSON.stringify(serverMessage));
 							serverMessage = {
 								xcommand: 'DAMAGEUSER',
-								xvalue: hero.socketId
+								xvalue: {
+									targetId: hero.socketId,
+									damage: bullets[i].damage
+								}
 							};
 							send(JSON.stringify(serverMessage));
 						}
@@ -257,7 +268,10 @@ var update = function (modifier) {
 									send(JSON.stringify(serverMessage));
 									serverMessage = {
 										xcommand: 'DAMAGEUSER',
-										xvalue: otherUsers[ie].socketId
+										xvalue: {
+											targetId: hero.socketId,
+											damage: bullets[i].damage
+										}
 									};
 									send(JSON.stringify(serverMessage));
 								}

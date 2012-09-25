@@ -5,6 +5,16 @@ function log( text ) {
 	$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
 }
 
+function logIG( xvalue ) {
+	// received msg text
+	showLog = true;
+	showLogTimer = 125;
+	logText.unshift({xvalue: xvalue});
+	if (logText.length > 10) {
+		logText.pop();
+	}
+}
+
 function send( text ) {
 	Server.send( 'message', text );
 }
@@ -29,6 +39,8 @@ function closeAllMenus(except)
 		showItemMenu = false;
 	if (except != 'char')
 		showCharMenu = false;
+	if (except != 'ac')
+		showACMenu = false;
 }
 
 function getStorageUsed()
@@ -107,4 +119,24 @@ var lineDistance = function( point1, point2 )
   ys = ys * ys;
 
   return Math.sqrt( xs + ys );
+};
+
+var canSee = function(stealther, detecter) {
+	var stealthRating = stealther.stealth;
+	var stealthBonusRating = 0;
+
+	if (stealther.stealthBonus) {
+		stealthBonusRating += stealther.stealthBonus;
+	}
+
+	var detectRating = detecter.detect;
+	var detectBonusRating = 0;
+
+	if (stealther.detectBonus) {
+		detectBonusRating += stealther.detectBonus;
+	}
+
+	var skillRoll = Math.rand(2,20);
+	return (skillRoll >= 11) ? false : true;
+
 };

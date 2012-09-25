@@ -48,10 +48,10 @@ var render = function () {
 		}
 
 		if (music) {
-			bgmSound.play();
+			//bgmSound.play();
 		}
 		else {
-			bgmSound.pause();
+			//bgmSound.pause();
 		}
 
 		bgImage.src = "../../images/bg" + roomLevel  + ".png";
@@ -116,6 +116,23 @@ var render = function () {
 			}
 		});
 
+		jQuery.each(bombs, function(i, val) {
+			if (bombs[i] && bombs[i].roomId == hero.roomId) {
+				if (bombReady) {
+					ctx.beginPath();
+					ctx.arc(bombs[i].x, bombs[i].y, 64, 0, 2 * Math.PI, false);
+					if (bombs[i].userId == hero.userId) {
+						ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+					}
+					else {
+						ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+					}
+					ctx.fill();
+					ctx.drawImage(bombImage, bombs[i].x - 16, bombs[i].y - 16);
+				}
+			}
+		});
+
 		jQuery.each(otherUsers, function(i, val) {
 			if (otherReady) {
 				if (otherUsers[i] && otherUsers[i].roomId == hero.roomId){
@@ -147,6 +164,9 @@ var render = function () {
 				else if (otherEntities[i].type == 'accesscode') {
 					monsterImage.src = "../../images/accesscode.png";
 				}
+				else if (otherEntities[i].type == 'gimp') {
+					monsterImage.src = "../../images/gimp.png";
+				}
 				else {
 					monsterImage.src = "../../images/virus.png";
 				}
@@ -169,8 +189,18 @@ var render = function () {
 				ctx.textBaseline = "top";
 				ctx.fillText(otherEntities[i].eeg, otherEntities[i].x, otherEntities[i].y - 32);
 
+				var canSeeOther = true;
 
-				if (monsterReady) {
+				// if (otherEntities[i].userId == hero.userId) {
+				// 	canSeeOther = true;
+				// }
+				// else {
+				// 	if (canSee(otherEntities[i], hero)) {
+				// 		canSeeOther = true;
+				// 	}
+				// }
+
+				if (monsterReady && canSeeOther) {
 					ctx.drawImage(monsterImage, otherEntities[i].x - 16, otherEntities[i].y - 16);
 				}
 
@@ -291,6 +321,10 @@ var render = function () {
 			showStorageMenuUI();
 			ctx.drawImage(canvasEffects, 0, 0);
 		}
+		else if (showACMenu === true) {
+			showACMenuUI();
+			ctx.drawImage(canvasEffects, 0, 0);
+		}
 		else {
 			ctxEffects.clearRect ( 0 , 0 , canvas.width , canvas.height );
 		}
@@ -385,25 +419,31 @@ var showNodeMenuUI = function() {
 var showCharMenuUI = function() {
 	renderMenuBG();
 	ctxEffects.fillText('name: ' + username, 32, 32);
-	ctxEffects.fillText('speed: ' + hero.speed, 32, 48);
-	ctxEffects.fillText('credits: ' + hero.credits, 32, 64);
-	ctxEffects.fillText('secrating: ' + hero.secrating, 32, 80);
-	ctxEffects.fillText('snippets: ' + hero.snippets, 32, 96);
 
-	ctxEffects.fillText('stealth: ' + (hero.stealth + hero.stealthBonus) + ' (+' + hero.stealthBonus + ')', 32, 128);
-	ctxEffects.fillText('detect: ' + (hero.detect + hero.detectBonus) + ' (+' + hero.detectBonus + ')', 32, 144);
-	ctxEffects.fillText('attack: ' + (hero.attack + hero.attackBonus) + ' (+' + hero.attackBonus + ')', 32, 160);
-	ctxEffects.fillText('defend: ' + (hero.defend + hero.defendBonus) + ' (+' + hero.defendBonus + ')', 32, 176);
-	ctxEffects.fillText('coding: ' + hero.coding, 32, 192);
+	ctxEffects.fillText('eeg: ' + hero.eeg, 32, 64);
+	ctxEffects.fillText('willpower: ' + hero.willpower, 32, 80);
 
-	ctxEffects.fillText('eeg: ' + hero.eeg, 32, 224);
-	ctxEffects.fillText('willpower: ' + hero.willpower, 32, 240);
+	ctxEffects.fillText('secrating: ' + hero.secrating, 32, 112);
 
-	ctxEffects.fillText('storage: ' + getStorageUsed() + '/' + hero.maxStorage, 32, 272);
-	ctxEffects.fillText('memory: ' + getMemoryUsed() + '/' + hero.maxMemory, 32, 288);
+	ctxEffects.fillText('credits: ' + hero.credits, 32, 144);
+	ctxEffects.fillText('snippets: ' + hero.snippets, 32, 160);
 
-	ctxEffects.fillText('decking: ' + hero.decking, 32, 320);
-	ctxEffects.fillText('attack speed: ' + hero.attackspeed, 32, 336);
+	ctxEffects.fillText('speed: ' + hero.speed, 32, 192);
+	ctxEffects.fillText('attack speed: ' + hero.attackspeed, 32, 208);
+	ctxEffects.fillText('decking: ' + hero.decking, 32, 224);
+	ctxEffects.fillText('coding: ' + hero.coding, 32, 240);
+
+	ctxEffects.fillText('stealth: ' + (hero.stealth + hero.stealthBonus) + ' (+' + hero.stealthBonus + ')', 32, 272);
+	ctxEffects.fillText('detect: ' + (hero.detect + hero.detectBonus) + ' (+' + hero.detectBonus + ')', 32, 288);
+	ctxEffects.fillText('attack: ' + (hero.attack + hero.attackBonus) + ' (+' + hero.attackBonus + ')', 32, 304);
+	ctxEffects.fillText('defend: ' + (hero.defend + hero.defendBonus) + ' (+' + hero.defendBonus + ')', 32, 320);
+
+	ctxEffects.fillText('storage: ' + getStorageUsed() + '/' + hero.maxStorage, 32, 352);
+	ctxEffects.fillText('memory: ' + getMemoryUsed() + '/' + hero.maxMemory, 32, 368);
+
+	if (roomType == 'io') {
+		ctxEffects.fillText('1) access codes', canvas.width / 3, 32);
+	}
 };
 
 var showProgramMenuUI = function() {
@@ -422,6 +462,10 @@ var showProgramMenuUI = function() {
 	ctxEffects.fillText('b) eeg recover (100c)(10s)', 32, 208);
 	ctxEffects.fillText('1) scanner (100c)(10s)', 32, 224);
 	ctxEffects.fillText('2) dataminer (100c)(10s)', 32, 240);
+	ctxEffects.fillText('3) radblaster (100000c)(1000s)', 32, 256);
+	ctxEffects.fillText('4) gimp (1000c)(100s)', 32, 272);
+	ctxEffects.fillText('5) dropline (100c)(10s)', 32, 288);
+	ctxEffects.fillText('6) logicbomb (100c)(10s)', 32, 304);
 };
 
 var showMemoryMenuUI = function() {
@@ -445,6 +489,33 @@ var showMemoryMenuUI = function() {
 	if (getMemoryUsed() > 0) {
 		ctxEffects.fillText('u) unload all programs', 32, 80);
 	}
+};
+
+var showACMenuUI = function() {
+	renderMenuBG();
+	ctxEffects.textBaseline = "top";
+	ctxEffects.fillText('AVAILABLE ACCESS CODES', 32, 32);
+	ctxEffects.fillText('============================', 32, 48);
+
+	var foundInvProgCounter = 0;
+	var shownPrevPage = 0;
+
+	jQuery.each(accessCodes, function(i, val) {
+		if (pageArray[i] && pageArray[i].page == currentPage) {
+			++foundInvProgCounter;
+			availableChoices[foundInvProgCounter] = {
+				roomId: pageArray[i].roomId
+			};
+			ctxEffects.fillText(pageArray[i].hotkey + ') ' + pageArray[i].roomName, 32, 64 + (pageArray[i].hotkey * 16));
+			if (foundInvProgCounter == 9 && currentPage < maxPage) {
+				ctxEffects.fillText('n) next page', 32, 96 + (pageArray[i].hotkey * 16));
+			}
+			if (currentPage > 1 && shownPrevPage === 0) {
+				shownPrevPage = 1;
+				ctxEffects.fillText('p) previous page', 32, 112 + (pageArray[i].hotkey * 16));
+			}
+		}
+	});
 };
 
 var showInventoryMenuUI = function() {
@@ -484,14 +555,23 @@ var showItemMenuUI = function() {
 	ctxEffects.fillText('rating: ' + programObject.rating, 32, 80);
 	ctxEffects.fillText('condition: ' + programObject.condition, 32, 96);
 	ctxEffects.fillText('type: ' + programObject.type, 32, 112);
-	ctxEffects.fillText('max upgrades: ' + programObject.maxUpgrades, 32, 128);
-	ctxEffects.fillText('upgrades: ' + programObject.upgrades, 32, 144);
+
+	if (programObject.type != 'dataminer' &&
+		programObject.type != 'scanner' &&
+		programObject.type != 'eegbooster' ) {
+			ctxEffects.fillText('max upgrades: ' + programObject.maxUpgrades, 32, 128);
+			ctxEffects.fillText('upgrades: ' + programObject.upgrades, 32, 144);
+	}
 
 	if (programObject.rating < 8 &&
 		programObject.loaded === 0 &&
 		programObject.upgrades < programObject.maxUpgrades &&
 		hero.credits >= (programObject.rating * programObject.rating) * 1000 &&
-		hero.snippets >= (programObject.rating * programObject.rating) * 10) {
+		hero.snippets >= (programObject.rating * programObject.rating) * 10 &&
+		programObject.type != 'dataminer' &&
+		programObject.type != 'scanner' &&
+		programObject.type != 'eegbooster' &&
+		programObject.type != 'dropline') {
 		var upgradeCredCost = (programObject.rating * programObject.rating) * 1000;
 		var upgradeSnipCost = (programObject.rating * programObject.rating) * 10;
 		ctxEffects.fillText('g) upgrade (' + upgradeCredCost + 'c) (' + upgradeSnipCost + 's)', 32, 176);
@@ -500,9 +580,10 @@ var showItemMenuUI = function() {
 	if (programObject.loaded == 1) {
 		ctxEffects.fillText('u) unload', 32, 192);
 	} else {
-		if (getMemoryUsed() + programObject.rating <= hero.maxMemory) {
+		if (getMemoryUsed() + programObject.rating <= hero.maxMemory && usedSlots < hero.slots) {
 			ctxEffects.fillText('l) load', 32, 192);
 		}
+		ctxEffects.fillText('t) delete', 32, 208);
 	}
 
 };

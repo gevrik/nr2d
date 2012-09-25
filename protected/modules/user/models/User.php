@@ -86,6 +86,8 @@ class User extends CActiveRecord
         $relations['programs'] = array(self::HAS_MANY, 'Program', 'userId');
         $relations['roomAmount'] = array(self::STAT, 'Room', 'userId');
         $relations['rooms'] = array(self::HAS_MANY, 'Room', 'userId');
+        $relations['acAmount'] = array(self::STAT, 'Accesscode', 'userId');
+        $relations['acs'] = array(self::HAS_MANY, 'Accesscode', 'userId');
         return $relations;
 	}
 

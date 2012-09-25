@@ -73,7 +73,7 @@
 		// websocket
 		log('> connecting...');
 		//Server = new FancyWebSocket('ws://127.0.0.1:9300');
-		Server = new FancyWebSocket('ws://totalmadownage.de:9300');
+		Server = new FancyWebSocket('ws://localhost:9300');
 
 		$('#message').keypress(function(e) {
 			if ( e.keyCode == 13 && this.value ) {
@@ -111,7 +111,7 @@
 		//OH NOES! Disconnection occurred.
 		Server.bind('close', function( data ) {
 			log( "Disconnected." );
-			alert('You have been disconnected!');
+			//alert('You have been disconnected!');
 		});
 
 		//Log any messages sent from server
@@ -147,38 +147,48 @@
 
 			if (combatMode === true && baseAttackDelay < 1) {
 
-				var angle = Math.atan2(targetY - hero.y, targetX - hero.x) * 180 / Math.PI;
+				if (fireMode == 1) {
+					// radblaster
+				}
+				else {
 
-				if (angle < 0) {
-					angle = 360 + angle;
-				}
+					var angle = Math.atan2(targetY - hero.y, targetX - hero.x) * 180 / Math.PI;
 
-				if (angle > 315 || angle < 45) {
-					//console.log('shoot right');
-					targetX = hero.x + hero.speed;
-					targetY = hero.y;
-				}
-				else if( angle > 45 && angle < 135)
-				{
-					//console.log('shoot down');
-					targetX = hero.x;
-					targetY = hero.y + hero.speed;
-				}
-				else if( angle > 135 && angle < 225)
-				{
-					//console.log('shoot left');
-					targetX = hero.x - hero.speed;
-					targetY = hero.y;
-				}
-				else if( angle > 225 && angle < 315)
-				{
-					//console.log('shoot up');
-					targetX = hero.x;
-					targetY = hero.y - hero.speed;
+					if (angle < 0) {
+						angle = 360 + angle;
+					}
+
+					if (angle > 315 || angle < 45) {
+						//console.log('shoot right');
+						targetX = hero.x + hero.speed;
+						targetY = hero.y;
+					}
+					else if( angle > 45 && angle < 135)
+					{
+						//console.log('shoot down');
+						targetX = hero.x;
+						targetY = hero.y + hero.speed;
+					}
+					else if( angle > 135 && angle < 225)
+					{
+						//console.log('shoot left');
+						targetX = hero.x - hero.speed;
+						targetY = hero.y;
+					}
+					else if( angle > 225 && angle < 315)
+					{
+						//console.log('shoot up');
+						targetX = hero.x;
+						targetY = hero.y - hero.speed;
+					}
 				}
 
 				var trajX = targetX - currentX;
 				var trajY = targetY - currentY;
+				
+				var damage = 1;
+				damage += hero.attack;
+				damage += hero.attackBonus;
 
 				var serverMessage = {
 					xcommand: 'ADDBULLET',
@@ -190,7 +200,8 @@
 						trajX: trajX,
 						trajY: trajY,
 						userId: holygrail,
-						roomId: hero.roomId * 1
+						roomId: hero.roomId * 1,
+						damage: damage
 					}
 				};
 				send( JSON.stringify(serverMessage) );

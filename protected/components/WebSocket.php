@@ -147,18 +147,18 @@ class WebSocket
 
 			$entityAmount = $room->entityAmount;
 
-			if ($entityAmount < $room->level && $room->type == 'firewall') {
+			if ($entityAmount < 1 && $room->type == 'firewall') {
 				$this->wsRooms[$room->id]['entityAmount'] += 1;
 				$entity = new Entity;
 				$entity->userId = $room->userId;
 				$entity->roomId = $room->id;
 				$entity->type = 'bouncer';
 				$entity->created = date( 'Y-m-d H:i:s', time());
-				$entity->attack = 0;
-				$entity->defend = 0;
-				$entity->stealth = 0;
-				$entity->detect = 1;
-				$entity->eeg = 10;
+				$entity->attack = $room->level;
+                $entity->defend = ceil($room->level/2);
+                $entity->stealth = 0;
+                $entity->detect = $room->level;
+                $entity->eeg = 10 * $room->level;
 				$entity->x = rand(2, 14) * 32;
 				$entity->y = rand(2, 14) * 32;
 				$entity->credits = 0;
@@ -167,7 +167,7 @@ class WebSocket
 
 			}
 
-			if ($entityAmount < $room->level && $room->type == 'terminal') {
+			if ($entityAmount < 1 && $room->type == 'terminal') {
 				$this->wsRooms[$room->id]['entityAmount'] += 1;
 				$entity = new Entity;
 				$entity->userId = $room->userId;
@@ -175,19 +175,19 @@ class WebSocket
 				$entity->type = 'user';
 				$entity->created = date( 'Y-m-d H:i:s', time());
 				$entity->attack = 0;
-				$entity->defend = 1;
-				$entity->stealth = 0;
-				$entity->detect = 0;
-				$entity->eeg = 10;
+				$entity->defend = $room->level;
+				$entity->stealth = ceil($room->level/2);
+				$entity->detect = ceil($room->level/2);
+				$entity->eeg = $room->level * 10;
 				$entity->x = rand(2, 14) * 32;
 				$entity->y = rand(2, 14) * 32;
-				$entity->credits = 0;
+				$entity->credits = 10 * ceil($room->level/2);
 
 				$entity->save();
 
 			}
 
-			if ($entityAmount < $room->level && $room->type == 'database') {
+			if ($entityAmount < 1 && $room->type == 'database') {
 				$this->wsRooms[$room->id]['entityAmount'] += 1;
 				$entity = new Entity;
 				$entity->userId = $room->userId;
@@ -195,19 +195,19 @@ class WebSocket
 				$entity->type = 'fragment';
 				$entity->created = date( 'Y-m-d H:i:s', time());
 				$entity->attack = 0;
-				$entity->defend = 0;
-				$entity->stealth = 1;
+				$entity->defend = ceil($room->level/2);
+				$entity->stealth = $room->level;
 				$entity->detect = 0;
-				$entity->eeg = 10;
+				$entity->eeg = $room->level * 10;
 				$entity->x = rand(2, 14) * 32;
 				$entity->y = rand(2, 14) * 32;
-				$entity->credits = 0;
+				$entity->credits = 10 * ceil($room->level/2);
 
 				$entity->save();
 
 			}
 
-			if ($entityAmount < $room->level && $room->type == 'coproc') {
+			if ($entityAmount < 1 && $room->type == 'coproc') {
 				$this->wsRooms[$room->id]['entityAmount'] += 1;
 				$entity = new Entity;
 				$entity->userId = $room->userId;
@@ -215,19 +215,19 @@ class WebSocket
 				$entity->type = 'worker';
 				$entity->created = date( 'Y-m-d H:i:s', time());
 				$entity->attack = 0;
-				$entity->defend = 1;
-				$entity->stealth = 0;
+				$entity->defend = ceil($room->level/2);
+				$entity->stealth = ceil($room->level/2);
 				$entity->detect = 0;
-				$entity->eeg = 10;
+				$entity->eeg = 10 * ceil($room->level/2);
 				$entity->x = rand(2, 14) * 32;
 				$entity->y = rand(2, 14) * 32;
-				$entity->credits = 0;
+				$entity->credits = 10 * ceil($room->level/2);
 
 				$entity->save();
 
 			}
 
-			if ($entityAmount < $room->level && $room->type == 'coding') {
+			if ($entityAmount < 1 && $room->type == 'coding') {
 				$this->log('codebit spawned');
 				$this->wsRooms[$room->id]['entityAmount'] += 1;
 				$entity = new Entity;
@@ -236,19 +236,19 @@ class WebSocket
 				$entity->type = 'codebit';
 				$entity->created = date( 'Y-m-d H:i:s', time());
 				$entity->attack = 0;
-				$entity->defend = 0;
-				$entity->stealth = 1;
+				$entity->defend = ceil($room->level/2);
+				$entity->stealth = $room->level;
 				$entity->detect = 0;
-				$entity->eeg = 10;
+				$entity->eeg = 10 * ceil($room->level/2);
 				$entity->x = rand(2, 14) * 32;
 				$entity->y = rand(2, 14) * 32;
-				$entity->credits = 0;
+				$entity->credits = 10 * ceil($room->level/2);
 
 				$entity->save();
 
 			}
 
-			if ($entityAmount < $room->level && $room->type == 'hacking') {
+			if ($entityAmount < 1 && $room->type == 'hacking') {
 				$this->log('accesscode spawned');
 				$this->wsRooms[$room->id]['entityAmount'] += 1;
 				$entity = new Entity;
@@ -257,13 +257,13 @@ class WebSocket
 				$entity->type = 'accesscode';
 				$entity->created = date( 'Y-m-d H:i:s', time());
 				$entity->attack = 0;
-				$entity->defend = 0;
-				$entity->stealth = 1;
+				$entity->defend = ceil($room->level/2);
+				$entity->stealth = $room->level;
 				$entity->detect = 0;
-				$entity->eeg = 10;
+				$entity->eeg = 10 * ceil($room->level/2);
 				$entity->x = rand(2, 14) * 32;
 				$entity->y = rand(2, 14) * 32;
-				$entity->credits = 0;
+				$entity->credits = 10 * ceil($room->level/2);
 
 				$entity->save();
 
@@ -315,9 +315,9 @@ class WebSocket
 		$except = array();
 
 		$nextPingCheck = time() + 1;
-		$nextSpawnCheck = time() + 300;
+		$nextSpawnCheck = time() + 1800;
 		//$nextEcoCheck = time() + 900;
-		$nextMobCheck = time() + 2;
+		//$nextMobCheck = time() + 2;
 		while (isset($this->wsRead[0])) {
 			$changed = $this->wsRead;
 			$result = socket_select($changed, $write, $except, 1);
@@ -370,18 +370,19 @@ class WebSocket
 
 			if (time() >= $nextPingCheck) {
 				$this->wsCheckIdleClients();
+				$this->wsMobStuff();
 				$nextPingCheck = time() + 1;
 			}
 
 			if (time() >= $nextSpawnCheck) {
 				$this->wsCronStuff();
-				$nextSpawnCheck = time() + 300;
+				$nextSpawnCheck = time() + 1800;
 			}
 
-			if (time() >= $nextMobCheck) {
-				$this->wsMobStuff();
-				$nextMobCheck = time() + 2;
-			}
+			// if (time() >= $nextMobCheck) {
+			// 	$this->wsMobStuff();
+			// 	$nextMobCheck = time() + 2;
+			// }
 
 			// if (time() >= $nextEcoCheck) {
 			// 	$this->wsEcoStuff();
@@ -1051,8 +1052,11 @@ class WebSocket
 		date_default_timezone_set('Europe/Berlin');
 
 		foreach ($this->wsEntities as $entityId => $entityObject) {
-			$this->wsEntities[$entityId]['targetX'] = rand(2, 25) * 32;
-			$this->wsEntities[$entityId]['targetY'] = rand(2, 20) * 32;
+			$dirChangeChance = rand(1, 100);
+			if ($dirChangeChance <= $this->wsEntities[$entityId]['eeg'] + 25 ) {
+				$this->wsEntities[$entityId]['targetX'] = rand(2, 25) * 32;
+				$this->wsEntities[$entityId]['targetY'] = rand(2, 20) * 32;
+			}
 		}
 
 		foreach ($this->wsClients as $id => $client) {
@@ -1073,7 +1077,10 @@ class WebSocket
 								if ($skillRoll >= 11) {
 													
 									$currentBullets = count($this->wsBullets);
-						            //$Server->log($currentBullets);
+						            
+									$damage = 1;
+									$damage = (int)$this->wsEntities[$entityId]['attack'];
+
 						            $this->wsBullets[$currentBullets] = array(
 						                'bulletId' => $currentBullets,
 						                'currentX' => (int)$this->wsEntities[$entityId]['x'],
@@ -1084,7 +1091,8 @@ class WebSocket
 						                'trajX' => (int)$this->wsUsers[$id]['x'] - $this->wsEntities[$entityId]['x'],
 						                'trajY' => (int)$this->wsUsers[$id]['y'] - $this->wsEntities[$entityId]['y'],
 						                'roomId' => (int)$this->wsEntities[$entityId]['roomId'],
-						                'hadImpact' => 0
+						                'hadImpact' => 0,
+						                'damage' => $damage
 						            );
 
 						            $returnCommand = array(
@@ -1096,8 +1104,11 @@ class WebSocket
 						                $this->wsSend($idc, json_encode($returnCommand));
 						            }
 
-
-
+						            $returnCommand = array(
+						                'xcommand' => 'SPEEDMALUS',
+						                'xvalue' => 16 * $this->wsEntities[$entityId]['attack']
+						            );
+						            $this->wsSend($id, json_encode($returnCommand));
 
 								}
 							}
@@ -1118,17 +1129,51 @@ class WebSocket
 				                'trajX' => (int)$this->wsUsers[$id]['x'] - $this->wsEntities[$entityId]['x'],
 				                'trajY' => (int)$this->wsUsers[$id]['y'] - $this->wsEntities[$entityId]['y'],
 				                'roomId' => (int)$this->wsEntities[$entityId]['roomId'],
-				                'hadImpact' => 0
+				                'hadImpact' => 0,
+				                'damage' => (int)$this->wsEntities[$entityId]['attack'] + 1
 				            );
 
 				            $returnCommand = array(
-				                'xcommand' => 'ADDBULLETE',
+				                'xcommand' => 'ADDBULLET',
 				                'xvalue' => $this->wsBullets[$currentBullets]
 				            );
 
 				            foreach ( $this->wsClients as $idc => $clientc ) {
 				                $this->wsSend($idc, json_encode($returnCommand));
 				            }							
+						}
+
+						if ($this->wsEntities[$entityId]['type'] == 'gimp'){
+							foreach ($this->wsEntities as $ide => $objectE) {
+								if ($objectE['roomId'] == $this->wsEntities[$entityId]['roomId'] &&
+									$objectE['type'] == 'murphy virus') {
+									//$this->log('shoot at enemy entity');
+									$currentBullets = count($this->wsBullets);
+						            //$Server->log($currentBullets);
+						            $this->wsBullets[$currentBullets] = array(
+						                'bulletId' => $currentBullets,
+						                'currentX' => (int)$this->wsEntities[$entityId]['x'],
+						                'currentY' => (int)$this->wsEntities[$entityId]['y'],
+						                'targetX' => (int)$objectE['x'],
+						                'targetY' => (int)$objectE['y'],
+						                'userId' => (int)$this->wsEntities[$entityId]['userId'],
+						                'trajX' => (int)$objectE['x'] - $this->wsEntities[$entityId]['x'],
+						                'trajY' => (int)$objectE['y'] - $this->wsEntities[$entityId]['y'],
+						                'roomId' => (int)$this->wsEntities[$entityId]['roomId'],
+						                'hadImpact' => 0,
+						                'damage' => (int)$this->wsEntities[$entityId]['attack'] + 1
+						            );
+
+						            $returnCommand = array(
+						                'xcommand' => 'ADDBULLET',
+						                'xvalue' => $this->wsBullets[$currentBullets]
+						            );
+
+						            foreach ( $this->wsClients as $idc => $clientc ) {
+						                $this->wsSend($idc, json_encode($returnCommand));
+						            }
+								}
+							}
 						}
 
 					}
@@ -1185,11 +1230,12 @@ class WebSocket
 	    foreach ($this->wsRooms as $roomId => $roomObject) {
 
 	    	// normal entity spawn
-	    	if ($this->wsRooms[$roomId]['entityAmount'] < $this->wsRooms[$roomId]['level']) {
+	    	//if ($this->wsRooms[$roomId]['entityAmount'] < $this->wsRooms[$roomId]['level']) {
+	    	if ($this->wsRooms[$roomId]['entityAmount'] < 1) {
 
 	    		$spawnChance = rand(1, 100);
 
-	    		if ($spawnChance > 50 && $this->wsRooms[$roomId]['type'] != 'io') {
+	    		if ($spawnChance > 1 && $this->wsRooms[$roomId]['type'] != 'io') {
 	    			$this->wsRooms[$roomId]['entityAmount'] += 1;
 					$entity = new Entity;
 					$entity->userId = $this->wsRooms[$roomId]['userId'];
@@ -1198,61 +1244,62 @@ class WebSocket
 					if ($this->wsRooms[$roomId]['type'] == 'database') {
 						$entity->type = 'fragment';
 						$entity->attack = 0;
-						$entity->defend = 0;
-						$entity->stealth = 1;
+						$entity->defend = ceil($this->wsRooms[$roomId]['level']/2);
+						$entity->stealth = (int)$this->wsRooms[$roomId]['level'];
 						$entity->detect = 0;
-						$entity->eeg = 10;
-						$entity->credits = 0;
+						$entity->eeg = (int)$this->wsRooms[$roomId]['level'] * 10;
+						$entity->credits = 10 * ceil($this->wsRooms[$roomId]['level']/2);
 					}
 
 					if ($this->wsRooms[$roomId]['type'] == 'firewall') {
 						$entity->type = 'bouncer';
-						$entity->attack = 0;
-						$entity->defend = 0;
+						$entity->attack = (int)$this->wsRooms[$roomId]['level'];
+						$entity->defend = ceil($this->wsRooms[$roomId]['level']/2);
 						$entity->stealth = 0;
-						$entity->detect = 1;
-						$entity->eeg = 10;
+						$entity->detect = (int)$this->wsRooms[$roomId]['level'];
+						$entity->eeg = (int)$this->wsRooms[$roomId]['level'] * 10;
 						$entity->credits = 0;
 					}
 
 					if ($this->wsRooms[$roomId]['type'] == 'terminal') {
 						$entity->type = 'user';
 						$entity->attack = 0;
-						$entity->defend = 1;
-						$entity->stealth = 0;
-						$entity->detect = 0;
-						$entity->eeg = 10;
-						$entity->credits = 0;
+						$entity->defend = (int)$this->wsRooms[$roomId]['level'];
+						$entity->stealth = ceil($this->wsRooms[$roomId]['level']/2);
+						$entity->detect = ceil($this->wsRooms[$roomId]['level']/2);
+						$entity->eeg = (int)$this->wsRooms[$roomId]['level'] * 10;
+						$entity->credits = ceil($this->wsRooms[$roomId]['level']/2) * 10;
 					}
 
 					if ($this->wsRooms[$roomId]['type'] == 'coproc') {
 						$entity->type = 'worker';
 						$entity->attack = 0;
-						$entity->defend = 1;
-						$entity->stealth = 0;
+						$entity->attack = 0;
+						$entity->defend = ceil($this->wsRooms[$roomId]['level']/2);
+						$entity->stealth = ceil($this->wsRooms[$roomId]['level']/2);
 						$entity->detect = 0;
-						$entity->eeg = 10;
-						$entity->credits = 0;
+						$entity->eeg = (int)$this->wsRooms[$roomId]['level'] * 10;
+						$entity->credits = ceil($this->wsRooms[$roomId]['level']/2) * 10;
 					}
 
 					if ($this->wsRooms[$roomId]['type'] == 'coding') {
 						$entity->type = 'codebit';
 						$entity->attack = 0;
-						$entity->defend = 0;
-						$entity->stealth = 1;
+						$entity->defend = ceil($this->wsRooms[$roomId]['level']/2);
+						$entity->stealth = (int)$this->wsRooms[$roomId]['level'];
 						$entity->detect = 0;
-						$entity->eeg = 10;
-						$entity->credits = 0;
+						$entity->eeg = (int)$this->wsRooms[$roomId]['level'] * 10;
+						$entity->credits = ceil($this->wsRooms[$roomId]['level']/2) * 10;
 					}
 
 					if ($this->wsRooms[$roomId]['type'] == 'hacking') {
 						$entity->type = 'accesscode';
 						$entity->attack = 0;
-						$entity->defend = 0;
-						$entity->stealth = 1;
+						$entity->defend = ceil($this->wsRooms[$roomId]['level']/2);
+						$entity->stealth = (int)$this->wsRooms[$roomId]['level'];
 						$entity->detect = 0;
-						$entity->eeg = 10;
-						$entity->credits = 0;
+						$entity->eeg = (int)$this->wsRooms[$roomId]['level'] * 10;
+						$entity->credits = ceil($this->wsRooms[$roomId]['level']/2) * 10;
 					}
 
 					$entity->created = date( 'Y-m-d H:i:s', time());
@@ -1277,14 +1324,14 @@ class WebSocket
 					$entity->roomId = $roomId;
 					$entity->type = 'murphy virus';
 					$entity->created = date( 'Y-m-d H:i:s', time());
-					$entity->attack = 1;
-					$entity->defend = 0;
-					$entity->stealth = 0;
-					$entity->detect = 0;
-					$entity->eeg = 10;
+					$entity->attack = ceil($this->wsRooms[$roomId]['level']/2);
+					$entity->defend = ceil($this->wsRooms[$roomId]['level']/2);
+					$entity->stealth = ceil($this->wsRooms[$roomId]['level']/2);
+					$entity->detect = ceil($this->wsRooms[$roomId]['level']/2);
+					$entity->eeg = 10 * ceil($this->wsRooms[$roomId]['level']/2);
 					$entity->x = rand(2, 23) * 32;
 					$entity->y = rand(2, 18) * 32;
-					$entity->credits = 1;
+					$entity->credits = 2 * ceil($this->wsRooms[$roomId]['level']/2);
 
 					$entity->save();
 
